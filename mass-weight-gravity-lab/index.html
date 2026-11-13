@@ -1,0 +1,1297 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Mass, Weight &amp; Gravity Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;family=IBM+Plex+Mono:wght@500;600&amp;family=Lexend:wght@400;500;600&amp;display=swap">
+<style>
+:root {
+  /* Layout: a sim frame. Stage and screen bar on the left, instrument panel on the right; challenges and data sit underneath.
+     One committed light look, like a classroom sim projected at the front of the room. */
+  --bg: #E6ECF3;
+  --panel: #FFFFFF;
+  --panel-2: #F2F5F9;
+  --edge: #C4CFDD;
+  --ink: #152033;
+  --ink-2: #4A5669;
+  --accent: #2C66D0;
+  --accent-2: #DCE7FA;
+  --force: #E1561C;
+  --support: #21925E;
+  --nav: #141B29;
+  --nav-ink: #D7DFEB;
+  --nav-on: #FFC83A;
+  --reset: #EF8A2B;
+  --ok: #17734A; --ok-bg: #E2F3E9;
+  --no: #A2411A; --no-bg: #FBEAE1;
+  --display: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --ui: "Lexend", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--ui); font-size: 15px; line-height: 1.45; }
+.app {
+  max-width: 1260px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px;
+  padding-block: 14px 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.head { display: flex; align-items: center; gap: 12px; }
+.head svg { flex: none; }
+.head h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 26px; line-height: 1.15; text-wrap: balance; }
+.head p { margin: 2px 0 0; color: var(--ink-2); font-size: 14px; }
+.head b { color: var(--ink); font-weight: 600; }
+
+.sim { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 14px; align-items: start; }
+.stage-wrap { background: var(--panel); border: 1px solid var(--edge); border-radius: 18px; overflow: hidden; min-width: 0; }
+.stage { position: relative; width: 100%; aspect-ratio: 16 / 10; max-width: 100%; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; }
+
+.screens { display: flex; align-items: stretch; gap: 6px; background: var(--nav); padding: 8px 10px; }
+.tab {
+  flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  background: transparent; color: var(--nav-ink); border: 2px solid transparent; border-radius: 12px;
+  font: 500 13px/1.2 var(--ui); padding: 6px 4px; cursor: pointer; min-height: 52px; text-align: center;
+}
+.tab:hover { background: rgba(255,255,255,.06); }
+.tab[aria-pressed="true"] { border-color: var(--nav-on); color: #FFFFFF; background: rgba(255,200,58,.10); }
+.tab svg { width: 40px; height: 26px; }
+.reset {
+  flex: none; align-self: center; width: 48px; height: 48px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35);
+  background: var(--reset); color: #FFFFFF; display: grid; place-items: center; cursor: pointer; margin-left: 4px;
+}
+.reset:hover { filter: brightness(1.06); }
+.tab:focus-visible, .reset:focus-visible { outline: 3px solid var(--nav-on); outline-offset: 2px; }
+
+.panel { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.group { margin: 0; border: 1px solid var(--edge); border-radius: 14px; background: var(--panel); padding: 10px 12px 12px; min-width: 0; }
+.group > legend, .group > h3 { font: 600 16px/1.2 var(--display); padding: 0 6px; margin: 0; color: var(--ink); }
+.group > h3 { padding: 0 0 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.chip { position: relative; }
+.chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.chip span {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 6px 12px; border-radius: 999px;
+  border: 1.5px solid var(--edge); background: var(--panel-2); color: var(--ink); font-size: 14px; cursor: pointer; white-space: nowrap;
+}
+.chip small { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
+.chip input:checked + span { background: var(--accent); border-color: var(--accent); color: #FFFFFF; }
+.chip input:checked + span small { color: #E3ECFF; }
+.chip input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px; }
+.gnote { margin: 8px 2px 0; font-size: 14px; color: var(--ink-2); }
+.gnote b { color: var(--ink); font-family: var(--mono); font-weight: 600; }
+
+.readout { background: var(--panel-2); }
+.rd-label { font-size: 13px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+.rd-value { font: 600 30px/1.15 var(--mono); color: var(--ink); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.rd-sub { margin: 4px 0 0; font-size: 14px; color: var(--ink-2); }
+.rd-sub b { color: var(--ink); }
+.pill { display: inline-block; margin-top: 6px; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 500; background: var(--accent-2); color: #1D4A9E; }
+.pill.ok { background: var(--ok-bg); color: var(--ok); }
+.pill.warn { background: var(--no-bg); color: var(--no); }
+
+.btn {
+  font: 500 14px/1.2 var(--ui); min-height: 40px; padding: 8px 12px; border-radius: 10px; cursor: pointer;
+  border: 1.5px solid var(--edge); background: var(--panel); color: var(--ink);
+}
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #FFFFFF; }
+.btn.primary:hover { filter: brightness(1.07); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.row + .row { margin-top: 8px; }
+.wide { width: 100%; }
+.check { display: flex; align-items: center; gap: 8px; min-height: 32px; font-size: 14px; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+.slider { display: grid; gap: 2px; }
+.slider + .slider { margin-top: 10px; }
+.slider label { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 14px; }
+.slider output { font: 600 15px var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+.slider input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; margin: 0; }
+.math { font: 500 14px/1.6 var(--mono); color: var(--ink); overflow-x: auto; }
+.math div { white-space: nowrap; }
+#graph { width: 100%; height: 190px; display: block; }
+
+.activity { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+.card { background: var(--panel); border: 1px solid var(--edge); border-radius: 18px; padding: 16px 18px; min-width: 0; }
+.card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.card h2 { margin: 0; font: 600 21px/1.2 var(--display); }
+.progress { font-size: 13px; color: var(--ink-2); }
+.challenges { list-style: none; margin: 8px 0 0; padding: 0; counter-reset: ch; }
+.challenges > li { counter-increment: ch; border-top: 1px dashed var(--edge); padding: 12px 0 12px 40px; position: relative; }
+.challenges > li::before {
+  content: counter(ch); position: absolute; left: 0; top: 12px; width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center; font: 600 15px var(--display); background: var(--accent-2); color: #1D4A9E;
+}
+.challenges > li.done::before { content: "✓"; background: var(--ok-bg); color: var(--ok); }
+.q { margin: 0 0 8px; max-width: 62ch; }
+.ans { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ans input[type="text"] {
+  width: 7.5em; font: 500 15px var(--mono); padding: 7px 9px; border-radius: 8px; border: 1.5px solid var(--edge);
+  background: #FFFFFF; color: var(--ink);
+}
+.ans input[type="text"]:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.mc { display: grid; gap: 4px; width: 100%; }
+.mc label { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; font-size: 14px; }
+.mc input { margin-top: 3px; accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+.fb { margin: 8px 0 0; padding: 6px 10px; border-radius: 8px; font-size: 14px; max-width: 62ch; }
+.fb.ok { background: var(--ok-bg); color: var(--ok); }
+.fb.no { background: var(--no-bg); color: var(--no); }
+.tablewrap { overflow-x: auto; margin-top: 10px; }
+table.data { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+table.data th { text-align: left; font-weight: 600; color: var(--ink-2); border-bottom: 1.5px solid var(--edge); padding: 6px 8px; white-space: nowrap; }
+table.data td { border-bottom: 1px solid var(--edge); padding: 6px 8px; white-space: nowrap; }
+table.data td.num { font-family: var(--mono); }
+.empty { color: var(--ink-2); font-size: 14px; margin: 10px 0 0; }
+.note { font-size: 13px; color: var(--ink-2); margin: 8px 0 0; }
+.sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 920px) {
+  .sim, .activity { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  .stage { aspect-ratio: 4 / 3.3; }
+  .head h1 { font-size: 22px; }
+  .tab { font-size: 12px; }
+  .tab svg { width: 34px; height: 22px; }
+}
+</style>
+
+<div class="app" id="app">
+  <header class="head">
+    <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true">
+      <circle cx="22" cy="22" r="20" fill="#2C66D0"></circle>
+      <ellipse cx="22" cy="22" rx="20" ry="7" fill="none" stroke="#FFC83A" stroke-width="2.5" transform="rotate(-20 22 22)"></ellipse>
+      <circle cx="22" cy="22" r="9" fill="#FFFFFF"></circle>
+      <path d="M22 16 v10 m-4 -4 l4 4 l4 -4" stroke="#E1561C" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+    </svg>
+    <div>
+      <h1>Mass, Weight &amp; Gravity Lab</h1>
+      <p>Grade 9 physics · <b id="screenName">Mass &amp; Weight</b></p>
+    </div>
+  </header>
+
+  <div class="sim">
+    <div class="stage-wrap">
+      <div class="stage" id="stageBox">
+        <canvas id="stage" role="img" aria-label="Simulation view"></canvas>
+      </div>
+      <nav class="screens" aria-label="Sim screens">
+        <button type="button" class="tab" data-go="1" aria-pressed="true">
+          <svg viewBox="0 0 40 26" aria-hidden="true"><rect x="7" y="16" width="26" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="2"></rect><rect x="13" y="5" width="14" height="11" rx="2" fill="currentColor"></rect><rect x="15" y="18" width="10" height="3" fill="currentColor" opacity=".6"></rect></svg>
+          <span>Mass &amp; Weight</span>
+        </button>
+        <button type="button" class="tab" data-go="2" aria-pressed="false">
+          <svg viewBox="0 0 40 26" aria-hidden="true"><circle cx="9" cy="16" r="6" fill="currentColor"></circle><circle cx="31" cy="16" r="8" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M9 5 h9 m-3 -3 l3 3 l-3 3 M31 5 h-9 m3 -3 l-3 3 l3 3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span>Gravity Force</span>
+        </button>
+        <button type="button" class="tab" data-go="3" aria-pressed="false">
+          <svg viewBox="0 0 40 26" aria-hidden="true"><path d="M2 25 a 16 16 0 0 1 12 -22" fill="none" stroke="currentColor" stroke-width="2"></path><path d="M2 25 a 22 22 0 0 1 17 -24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 3"></path><rect x="27" y="10" width="6" height="6" fill="currentColor"></rect><rect x="22" y="11.5" width="4" height="3" fill="currentColor" opacity=".7"></rect><rect x="34" y="11.5" width="4" height="3" fill="currentColor" opacity=".7"></rect></svg>
+          <span>Gravity in Space</span>
+        </button>
+        <button type="button" class="reset" id="resetBtn" aria-label="Reset this screen" title="Reset this screen">
+          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12a7 7 0 1 1-2.05-4.95" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path><path d="M19.5 3.5v5h-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+      </nav>
+    </div>
+
+    <aside class="panel" aria-label="Controls">
+      <!-- Screen 1: Mass & Weight -->
+      <div class="ctl" data-screen="1">
+        <fieldset class="group">
+          <legend>Location</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="loc" id="loc-earth" value="earth" checked><span>Earth</span></label>
+            <label class="chip"><input type="radio" name="loc" id="loc-moon" value="moon"><span>Moon</span></label>
+            <label class="chip"><input type="radio" name="loc" id="loc-mars" value="mars"><span>Mars</span></label>
+            <label class="chip"><input type="radio" name="loc" id="loc-jupiter" value="jupiter"><span>Jupiter</span></label>
+            <label class="chip"><input type="radio" name="loc" id="loc-iss" value="iss"><span>ISS (in orbit)</span></label>
+          </div>
+          <p class="gnote" id="gNote">Gravity here: <b>9.8 N/kg</b></p>
+        </fieldset>
+        <fieldset class="group" style="margin-top:10px">
+          <legend>Object</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="obj" id="obj-labmass" value="labmass"><span>Lab mass <small>1.0 kg</small></span></label>
+            <label class="chip"><input type="radio" name="obj" id="obj-rice" value="rice"><span>Bag of rice <small>2.0 kg</small></span></label>
+            <label class="chip"><input type="radio" name="obj" id="obj-ball" value="ball" checked><span>Bowling ball <small>5.0 kg</small></span></label>
+            <label class="chip"><input type="radio" name="obj" id="obj-mystery" value="mystery"><span>Mystery box <small>? kg</small></span></label>
+          </div>
+        </fieldset>
+        <fieldset class="group" style="margin-top:10px">
+          <legend>Measure with</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="tool" id="tool-scale" value="scale" checked><span>Scale</span></label>
+            <label class="chip"><input type="radio" name="tool" id="tool-balance" value="balance"><span>Balance</span></label>
+            <label class="chip"><input type="radio" name="tool" id="tool-push" value="push"><span>Push test</span></label>
+          </div>
+        </fieldset>
+        <div class="group readout" style="margin-top:10px">
+          <div class="rd-label" id="rdLabel">Scale reads</div>
+          <div class="rd-value" id="rdValue">49.0 N</div>
+          <p class="rd-sub" id="rdSub"></p>
+          <div id="balanceCtl" hidden>
+            <div class="row" style="margin-top:10px">
+              <button type="button" class="btn" data-add="1">+1 kg</button>
+              <button type="button" class="btn" data-add="0.5">+0.5 kg</button>
+              <button type="button" class="btn" data-add="0.1">+0.1 kg</button>
+            </div>
+            <div class="row">
+              <button type="button" class="btn" id="stdUndo">Take one off</button>
+              <button type="button" class="btn" id="stdClear">Empty the pan</button>
+            </div>
+          </div>
+          <div id="pushCtl" hidden>
+            <div class="row" style="margin-top:10px">
+              <button type="button" class="btn primary" id="pushBtn">Push (10 N)</button>
+            </div>
+            <label class="check" style="margin-top:6px"><input type="checkbox" id="showMass"> Show mass = F ÷ a</label>
+          </div>
+        </div>
+        <div class="group" style="margin-top:10px">
+          <label class="check"><input type="checkbox" id="showForces" checked> Show forces</label>
+          <button type="button" class="btn wide" id="record1" style="margin-top:6px">Record reading</button>
+        </div>
+      </div>
+
+      <!-- Screen 2: Gravity Force -->
+      <div class="ctl" data-screen="2" hidden>
+        <div class="group">
+          <div class="slider">
+            <label for="m1">Mass m₁ <output id="m1Out" for="m1">400 kg</output></label>
+            <input type="range" id="m1" min="10" max="1000" step="10" value="400">
+          </div>
+          <div class="slider">
+            <label for="m2">Mass m₂ <output id="m2Out" for="m2">400 kg</output></label>
+            <input type="range" id="m2" min="10" max="1000" step="10" value="400">
+          </div>
+          <div class="slider">
+            <label for="dist">Distance r (center to center) <output id="distOut" for="dist">4.0 m</output></label>
+            <input type="range" id="dist" min="0.5" max="8.8" step="0.1" value="4">
+          </div>
+          <p class="note">You can also drag the balls along the ruler.</p>
+        </div>
+        <div class="group readout">
+          <div class="rd-label">Gravitational force on each ball</div>
+          <div class="rd-value" id="fValue" style="font-size:24px">6.67 × 10⁻⁷ N</div>
+          <p class="rd-sub" id="fSub">Each ball pulls on the other this hard.</p>
+        </div>
+        <div class="group">
+          <label class="check"><input type="checkbox" id="showValues" checked> Force values on arrows</label>
+          <label class="check"><input type="checkbox" id="sciNote" checked> Scientific notation</label>
+          <label class="check"><input type="checkbox" id="showMath" checked> Show the math</label>
+          <div class="math" id="mathBox" style="margin-top:6px"></div>
+          <button type="button" class="btn wide" id="record2" style="margin-top:8px">Record reading</button>
+        </div>
+      </div>
+
+      <!-- Screen 3: Gravity in Space -->
+      <div class="ctl" data-screen="3" hidden>
+        <div class="group">
+          <div class="slider">
+            <label for="rdist">Distance from Earth's center <output id="rOut" for="rdist">1.50 Earth radii</output></label>
+            <input type="range" id="rdist" min="1" max="10" step="0.01" value="1.5">
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button type="button" class="btn" data-r="1">Ground</button>
+            <button type="button" class="btn" data-r="1.0628">ISS orbit</button>
+            <button type="button" class="btn" data-r="2">2 Earth radii</button>
+            <button type="button" class="btn" data-r="4.17">GPS orbit</button>
+            <button type="button" class="btn" data-r="60.3454">Moon's distance</button>
+          </div>
+          <p class="note">Or drag the probe. It has a mass of 1.0 kg.</p>
+        </div>
+        <div class="group readout">
+          <div class="rd-label">Earth's pull on the probe</div>
+          <div class="rd-value" id="pullValue">4.36 N</div>
+          <p class="rd-sub" id="pullSub"></p>
+        </div>
+        <div class="group">
+          <h3>Pull vs. distance</h3>
+          <canvas id="graph" role="img" aria-label="Graph of Earth's pull on the 1.0 kilogram probe against distance from Earth's center"></canvas>
+          <div class="row" style="margin-top:8px">
+            <button type="button" class="btn primary" id="record3">Plot this point</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <section class="activity">
+    <div class="card">
+      <div class="card-head">
+        <h2>Challenges</h2>
+        <span class="progress" id="progress"></span>
+      </div>
+      <ol class="challenges" id="challengeList"></ol>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <h2>Your data</h2>
+        <button type="button" class="btn" id="clearData">Clear table</button>
+      </div>
+      <div id="dataBox"></div>
+    </div>
+  </section>
+  <p class="sr" id="live" aria-live="polite"></p>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+/* ---------- constants ---------- */
+const G = 6.67e-11;
+const RE_KM = 6370;
+const PUSH_F = 10, PUSH_T = 0.5, TRACK_M = 3.0;
+const FONT_UI = '"Lexend","Segoe UI",system-ui,sans-serif';
+const FONT_MONO = '"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace';
+const FONT_DISPLAY = '"Fredoka","Trebuchet MS",system-ui,sans-serif';
+const C = { force: "#E1561C", support: "#21925E", ink: "#152033", m1: "#2E66D3", m2: "#D3413B" };
+const reduceMotion = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+const LOC = {
+  earth:   { name: "Earth",   g: 9.8,  free: false },
+  moon:    { name: "Moon",    g: 1.6,  free: false },
+  mars:    { name: "Mars",    g: 3.7,  free: false },
+  jupiter: { name: "Jupiter", g: 24.8, free: false },
+  iss:     { name: "ISS (in orbit)", g: 8.7, free: true }
+};
+const OBJ = {
+  labmass: { name: "lab mass",     title: "Lab mass",     m: 1.0, known: true },
+  rice:    { name: "bag of rice",  title: "Bag of rice",  m: 2.0, known: true },
+  ball:    { name: "bowling ball", title: "Bowling ball", m: 5.0, known: true },
+  mystery: { name: "mystery box",  title: "Mystery box",  m: 3.6, known: false }
+};
+const TOOL = { scale: "Scale", balance: "Balance", push: "Push test" };
+const SCREEN_NAMES = { 1: "Mass & Weight", 2: "Gravity Force", 3: "Gravity in Space" };
+
+/* ---------- helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const SUP = { "-": "⁻", "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" };
+function sci(x, sig = 3) {
+  if (!isFinite(x) || x === 0) return "0";
+  let e = Math.floor(Math.log10(Math.abs(x)));
+  let m = x / Math.pow(10, e);
+  let ms = m.toFixed(sig - 1);
+  if (Math.abs(parseFloat(ms)) >= 10) { e += 1; ms = (x / Math.pow(10, e)).toFixed(sig - 1); }
+  if (e === 0) return ms;
+  return ms + " × 10" + String(e).split("").map(c => SUP[c]).join("");
+}
+function plain(x, sig = 3) {
+  if (x === 0) return "0";
+  const e = Math.floor(Math.log10(Math.abs(x)));
+  const d = Math.max(0, sig - 1 - e);
+  return x.toFixed(Math.min(d, 20));
+}
+function fmtForce(x, useSci) { return (useSci ? sci(x) : plain(x)) + " N"; }
+function fmtPull(x) {
+  if (x >= 1) return x.toFixed(2);
+  if (x >= 0.1) return x.toFixed(3);
+  return plain(x, 2);
+}
+function fmtPct(p) {
+  if (p >= 10) return p.toFixed(0);
+  if (p >= 1) return p.toFixed(1);
+  return plain(p, 2);
+}
+function rr(ctx, x, y, w, h, r) {
+  r = Math.max(0, Math.min(r, w / 2, h / 2));
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function rng(seed) { let s = seed >>> 0; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
+const STARS = (() => { const r = rng(11); return Array.from({ length: 170 }, () => ({ x: r(), y: r(), s: 0.5 + r() * 1.3, p: r() * 6.283 })); })();
+
+function forceArrow(ctx, x1, y1, x2, y2, fill, o = {}) {
+  const w = o.w || 8, hw = o.hw || 22, hl = o.hl || 16;
+  const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy);
+  if (len < 2) return;
+  const ux = dx / len, uy = dy / len, nx = -uy, ny = ux;
+  const h = Math.min(hl, len * 0.75), hwe = Math.min(hw, Math.max(w + 6, len * 0.9));
+  const bx = x2 - ux * h, by = y2 - uy * h;
+  ctx.beginPath();
+  ctx.moveTo(x1 + nx * w / 2, y1 + ny * w / 2);
+  ctx.lineTo(bx + nx * w / 2, by + ny * w / 2);
+  ctx.lineTo(bx + nx * hwe / 2, by + ny * hwe / 2);
+  ctx.lineTo(x2, y2);
+  ctx.lineTo(bx - nx * hwe / 2, by - ny * hwe / 2);
+  ctx.lineTo(bx - nx * w / 2, by - ny * w / 2);
+  ctx.lineTo(x1 - nx * w / 2, y1 - ny * w / 2);
+  ctx.closePath();
+  ctx.fillStyle = fill; ctx.fill();
+  ctx.lineWidth = 1.4; ctx.strokeStyle = "rgba(15,20,32,.85)"; ctx.stroke();
+}
+function tag(ctx, text, x, y, o = {}) {
+  const size = o.size || 13;
+  ctx.font = (o.weight || 600) + " " + size + "px " + (o.font || FONT_UI);
+  const pad = o.pad == null ? 6 : o.pad;
+  const w = ctx.measureText(text).width, h = size + pad * 1.4;
+  const align = o.align || "center";
+  const bx = align === "center" ? x - w / 2 - pad : align === "left" ? x - pad : x - w - pad;
+  if (o.bg !== "none") {
+    rr(ctx, bx, y - h / 2, w + pad * 2, h, o.radius == null ? 7 : o.radius);
+    ctx.fillStyle = o.bg || "rgba(255,255,255,.92)"; ctx.fill();
+    if (o.stroke) { ctx.lineWidth = 1.2; ctx.strokeStyle = o.stroke; ctx.stroke(); }
+  }
+  ctx.fillStyle = o.color || C.ink; ctx.textAlign = align; ctx.textBaseline = "middle";
+  ctx.fillText(text, x, y + 0.5);
+  return { x: bx, y: y - h / 2, w: w + pad * 2, h };
+}
+
+/* ---------- state ---------- */
+function defaults() {
+  return {
+    screen: 1,
+    s1: { loc: "earth", obj: "ball", tool: "scale", showForces: true, showMass: false, std: [], records: [] },
+    s2: { m1: 400, m2: 400, x1: 3.0, x2: 7.0, values: true, sci: true, math: true, records: [] },
+    s3: { r: 1.5, points: [] },
+    answers: {}
+  };
+}
+let state = defaults();
+const sim = {
+  t: 0,
+  bal: { a: 0, v: 0 },
+  push: { x: 0, v: 0, t: 0, phase: "ready", a: null },
+  drag: null
+};
+
+/* ---------- canvas setup ---------- */
+const stageBox = $("#stageBox"), canvas = $("#stage"), ctx = canvas.getContext("2d");
+const graph = $("#graph"), gctx = graph.getContext("2d");
+let W = 800, H = 500, GW = 300, GH = 190, DPR = 1;
+function resize() {
+  DPR = Math.min(2.5, window.devicePixelRatio || 1);
+  const r = stageBox.getBoundingClientRect();
+  W = Math.max(280, r.width); H = Math.max(200, r.height);
+  canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+  const gr = graph.getBoundingClientRect();
+  GW = Math.max(200, gr.width || 280); GH = Math.max(150, gr.height || 190);
+  graph.width = Math.round(GW * DPR); graph.height = Math.round(GH * DPR);
+}
+if (window.ResizeObserver) { const ro = new ResizeObserver(resize); ro.observe(stageBox); ro.observe(graph); }
+window.addEventListener("resize", resize);
+
+/* ---------- physics: screen 2 ---------- */
+const radM = m => 0.55 * Math.cbrt(m / 1000);
+function forceS2() { const s = state.s2; const r = s.x2 - s.x1; return G * s.m1 * s.m2 / (r * r); }
+function enforceSeparation(keepMid = true) {
+  const s = state.s2, r1 = radM(s.m1), r2 = radM(s.m2), minSep = r1 + r2 + 0.05;
+  let mid = keepMid ? (s.x1 + s.x2) / 2 : 5;
+  let sep = Math.max(s.x2 - s.x1, minSep);
+  sep = Math.min(sep, 10 - r1 - r2);
+  let x1 = mid - sep / 2, x2 = mid + sep / 2;
+  if (x1 < r1) { x1 = r1; x2 = x1 + sep; }
+  if (x2 > 10 - r2) { x2 = 10 - r2; x1 = x2 - sep; }
+  s.x1 = Math.round(x1 * 100) / 100; s.x2 = Math.round(x2 * 100) / 100;
+}
+
+/* ---------- physics: screen 3 ---------- */
+const pullAt = r => 9.8 / (r * r);
+
+/* ---------- drawing: shared ---------- */
+function drawStars(c, w, h, t) {
+  for (const s of STARS) {
+    c.globalAlpha = reduceMotion ? 0.8 : 0.5 + 0.5 * Math.abs(Math.sin(t * 0.9 + s.p));
+    c.fillStyle = "#FFFFFF"; c.beginPath(); c.arc(s.x * w, s.y * h, s.s, 0, 6.283); c.fill();
+  }
+  c.globalAlpha = 1;
+}
+
+/* ---------- screen 1 backdrops ---------- */
+function backdrop(loc, k, gy) {
+  const c = ctx;
+  if (loc === "earth") {
+    let g = c.createLinearGradient(0, 0, 0, gy); g.addColorStop(0, "#7FC2EE"); g.addColorStop(1, "#D7EEFB");
+    c.fillStyle = g; c.fillRect(0, 0, W, gy);
+    c.fillStyle = "#FFD45E"; c.beginPath(); c.arc(W * 0.88, H * 0.14, 24 * k, 0, 6.283); c.fill();
+    c.fillStyle = "rgba(255,255,255,.95)";
+    for (const [x, y, s] of [[0.2, 0.17, 1], [0.6, 0.1, 0.8], [0.42, 0.24, 0.6]]) {
+      const cx = W * x, cy = H * y, r = 18 * k * s;
+      c.beginPath(); c.arc(cx, cy, r, 0, 6.283); c.arc(cx + r * 1.1, cy - r * 0.4, r * 1.2, 0, 6.283); c.arc(cx + r * 2.3, cy, r * 0.9, 0, 6.283); c.fill();
+    }
+    c.fillStyle = "#A6D08F"; c.beginPath(); c.moveTo(0, gy);
+    for (let x = 0; x <= W; x += 20) c.lineTo(x, gy - 26 * k - Math.sin(x / (90 * k)) * 12 * k);
+    c.lineTo(W, gy); c.closePath(); c.fill();
+    c.fillStyle = "#68AE55"; c.fillRect(0, gy, W, H - gy);
+    c.fillStyle = "#7B5A3C"; c.fillRect(0, H - 14 * k, W, 14 * k);
+  } else if (loc === "moon") {
+    let g = c.createLinearGradient(0, 0, 0, gy); g.addColorStop(0, "#04060C"); g.addColorStop(1, "#151B2B");
+    c.fillStyle = g; c.fillRect(0, 0, W, gy);
+    drawStars(c, W, gy, sim.t);
+    const ex = W * 0.84, ey = H * 0.17, er = 22 * k;
+    c.fillStyle = "#3A7BD5"; c.beginPath(); c.arc(ex, ey, er, 0, 6.283); c.fill();
+    c.fillStyle = "#5DAA62"; c.beginPath(); c.ellipse(ex - er * 0.25, ey - er * 0.1, er * 0.4, er * 0.28, 0.5, 0, 6.283); c.fill();
+    c.fillStyle = "rgba(255,255,255,.8)"; c.beginPath(); c.ellipse(ex + er * 0.3, ey + er * 0.35, er * 0.45, er * 0.12, -0.3, 0, 6.283); c.fill();
+    c.fillStyle = "#9EA1A7"; c.fillRect(0, gy, W, H - gy);
+    c.fillStyle = "#86898F";
+    for (const [x, y, s] of [[0.12, 0.3, 1], [0.32, 0.65, 0.7], [0.75, 0.4, 1.2], [0.92, 0.75, 0.6], [0.55, 0.8, 0.5]]) {
+      c.beginPath(); c.ellipse(W * x, gy + (H - gy) * y, 26 * k * s, 7 * k * s, 0, 0, 6.283); c.fill();
+    }
+  } else if (loc === "mars") {
+    let g = c.createLinearGradient(0, 0, 0, gy); g.addColorStop(0, "#C7896A"); g.addColorStop(1, "#EFCDAE");
+    c.fillStyle = g; c.fillRect(0, 0, W, gy);
+    c.fillStyle = "rgba(255,247,232,.9)"; c.beginPath(); c.arc(W * 0.82, H * 0.17, 11 * k, 0, 6.283); c.fill();
+    c.fillStyle = "#A9573A"; c.beginPath(); c.moveTo(0, gy);
+    c.lineTo(0, gy - 30 * k); c.lineTo(W * 0.1, gy - 30 * k); c.lineTo(W * 0.16, gy - 48 * k); c.lineTo(W * 0.3, gy - 48 * k); c.lineTo(W * 0.36, gy - 22 * k);
+    c.lineTo(W * 0.68, gy - 22 * k); c.lineTo(W * 0.74, gy - 40 * k); c.lineTo(W * 0.86, gy - 40 * k); c.lineTo(W * 0.9, gy - 18 * k); c.lineTo(W, gy - 18 * k); c.lineTo(W, gy); c.closePath(); c.fill();
+    c.fillStyle = "#B85D35"; c.fillRect(0, gy, W, H - gy);
+    c.fillStyle = "#7F3A1E";
+    for (const [x, y, s] of [[0.1, 0.4, 1], [0.27, 0.75, 0.6], [0.8, 0.5, 0.9], [0.93, 0.25, 0.5], [0.62, 0.85, 0.7]]) {
+      c.beginPath(); c.ellipse(W * x, gy + (H - gy) * y, 12 * k * s, 7 * k * s, 0, 0, 6.283); c.fill();
+    }
+  } else if (loc === "jupiter") {
+    const bands = ["#E9CFA8", "#C9935F", "#F2E0C2", "#B97A4B", "#E7C394", "#D6A776", "#F3E3C8"];
+    const bh = gy / bands.length;
+    bands.forEach((col, i) => {
+      c.fillStyle = col; c.beginPath(); c.moveTo(0, i * bh);
+      for (let x = 0; x <= W; x += 24) c.lineTo(x, i * bh + Math.sin(x / (70 * k) + i * 1.7) * 4 * k);
+      c.lineTo(W, gy); c.lineTo(0, gy); c.closePath(); c.fill();
+    });
+    c.fillStyle = "#C1572F"; c.beginPath(); c.ellipse(W * 0.78, gy * 0.58, 46 * k, 20 * k, 0, 0, 6.283); c.fill();
+    c.fillStyle = "#E0C6A2"; c.fillRect(0, gy, W, H - gy);
+    c.fillStyle = "#8E98A6"; c.fillRect(W * 0.08, gy, W * 0.84, 12 * k);
+    c.fillStyle = "#6F7987"; c.fillRect(W * 0.08, gy + 12 * k, W * 0.84, 6 * k);
+    tag(c, "Imagine a platform floating at Jupiter's cloud tops", W / 2, H - 16 * k, { size: Math.round(12 * Math.max(k, 0.9)), weight: 500, bg: "rgba(255,255,255,.75)" });
+  } else {
+    let g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#E9EEF3"); g.addColorStop(1, "#CDD5DF");
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    c.strokeStyle = "#BAC4D1"; c.lineWidth = 1.5;
+    for (let x = 60 * k; x < W; x += 120 * k) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, gy); c.stroke(); }
+    c.beginPath(); c.moveTo(0, gy * 0.42); c.lineTo(W, gy * 0.42); c.stroke();
+    const wx = W * 0.84, wy = H * 0.2, wr = 40 * k;
+    c.fillStyle = "#A7B1BE"; c.beginPath(); c.arc(wx, wy, wr + 7 * k, 0, 6.283); c.fill();
+    c.save(); c.beginPath(); c.arc(wx, wy, wr, 0, 6.283); c.clip();
+    c.fillStyle = "#03050B"; c.fillRect(wx - wr, wy - wr, wr * 2, wr * 2);
+    c.fillStyle = "#2F6FC9"; c.beginPath(); c.arc(wx - wr * 0.2, wy + wr * 3.1, wr * 2.6, 0, 6.283); c.fill();
+    c.strokeStyle = "rgba(160,210,255,.9)"; c.lineWidth = 3 * k; c.beginPath(); c.arc(wx - wr * 0.2, wy + wr * 3.1, wr * 2.6, 0, 6.283); c.stroke();
+    c.restore();
+    c.fillStyle = "#E0B54A";
+    rr(c, W * 0.05, gy * 0.58, W * 0.22, 8 * k, 4 * k); c.fill();
+    c.fillStyle = "#AEB8C5"; c.fillRect(0, gy, W, H - gy);
+    c.fillStyle = "#97A2B1"; for (let x = 20 * k; x < W; x += 70 * k) c.fillRect(x, gy + 12 * k, 40 * k, 10 * k);
+  }
+}
+
+/* ---------- screen 1 objects ---------- */
+function drawObject(key, cx, bottom, k) {
+  const c = ctx;
+  if (key === "labmass") {
+    const w = 36 * k, h = 46 * k, x = cx - w / 2, y = bottom - h;
+    const g = c.createLinearGradient(x, 0, x + w, 0); g.addColorStop(0, "#8A94A2"); g.addColorStop(0.45, "#EEF1F4"); g.addColorStop(1, "#77818F");
+    rr(c, x, y, w, h, 5 * k); c.fillStyle = g; c.fill(); c.lineWidth = 1.2; c.strokeStyle = "#475161"; c.stroke();
+    c.fillStyle = "#8F99A6"; c.fillRect(cx - 4 * k, y - 8 * k, 8 * k, 8 * k);
+    c.strokeStyle = "#5B6470"; c.lineWidth = 3 * k; c.beginPath(); c.arc(cx, y - 14 * k, 6 * k, Math.PI * 0.2, Math.PI * 1.8, false); c.stroke();
+    c.fillStyle = "#1F2937"; c.font = "600 " + Math.round(12 * k) + "px " + FONT_MONO; c.textAlign = "center"; c.textBaseline = "middle";
+    c.fillText("1 kg", cx, y + h * 0.55);
+    return { cx, cy: y + h / 2, top: y - 20 * k, w, h: h + 20 * k };
+  }
+  if (key === "rice") {
+    const w = 64 * k, h = 62 * k;
+    c.beginPath();
+    c.moveTo(cx - w * 0.32, bottom - h * 0.86);
+    c.quadraticCurveTo(cx - w * 0.56, bottom - h * 0.42, cx - w * 0.48, bottom - h * 0.05);
+    c.quadraticCurveTo(cx, bottom + h * 0.03, cx + w * 0.48, bottom - h * 0.05);
+    c.quadraticCurveTo(cx + w * 0.56, bottom - h * 0.42, cx + w * 0.32, bottom - h * 0.86);
+    c.closePath(); c.fillStyle = "#EBD9B0"; c.fill(); c.lineWidth = 1.4; c.strokeStyle = "#8F7244"; c.stroke();
+    c.beginPath(); c.moveTo(cx - w * 0.32, bottom - h * 0.86); c.lineTo(cx - w * 0.14, bottom - h); c.lineTo(cx + w * 0.14, bottom - h); c.lineTo(cx + w * 0.32, bottom - h * 0.86); c.closePath();
+    c.fillStyle = "#E0C998"; c.fill(); c.stroke();
+    c.strokeStyle = "#7A5B30"; c.lineWidth = 2 * k; c.beginPath(); c.moveTo(cx - w * 0.3, bottom - h * 0.86); c.lineTo(cx + w * 0.3, bottom - h * 0.86); c.stroke();
+    c.fillStyle = "#5C4520"; c.textAlign = "center"; c.textBaseline = "middle";
+    c.font = "600 " + Math.round(12 * k) + "px " + FONT_UI; c.fillText("RICE", cx, bottom - h * 0.5);
+    c.font = "500 " + Math.round(11 * k) + "px " + FONT_MONO; c.fillText("2 kg", cx, bottom - h * 0.27);
+    return { cx, cy: bottom - h * 0.45, top: bottom - h, w, h };
+  }
+  if (key === "ball") {
+    const R = 30 * k, cy = bottom - R;
+    const g = c.createRadialGradient(cx - R * 0.35, cy - R * 0.4, R * 0.1, cx, cy, R);
+    g.addColorStop(0, "#7C8BF5"); g.addColorStop(0.55, "#2C35A6"); g.addColorStop(1, "#141A5C");
+    c.fillStyle = g; c.beginPath(); c.arc(cx, cy, R, 0, 6.283); c.fill();
+    c.lineWidth = 1.2; c.strokeStyle = "#0E1240"; c.stroke();
+    c.fillStyle = "#0A0D2E";
+    for (const [dx, dy] of [[0.25, -0.38], [0.52, -0.12], [0.18, 0.05]]) { c.beginPath(); c.arc(cx + dx * R, cy + dy * R, 3.6 * k, 0, 6.283); c.fill(); }
+    return { cx, cy, top: bottom - 2 * R, w: 2 * R, h: 2 * R };
+  }
+  const w = 66 * k, h = 54 * k, x = cx - w / 2, y = bottom - h;
+  rr(c, x, y, w, h, 4 * k); c.fillStyle = "#C99B5E"; c.fill(); c.lineWidth = 1.4; c.strokeStyle = "#7A5528"; c.stroke();
+  c.fillStyle = "#E6C891"; c.fillRect(cx - 7 * k, y, 14 * k, h);
+  c.strokeStyle = "#9C7442"; c.lineWidth = 1; c.beginPath(); c.moveTo(x, y + 10 * k); c.lineTo(x + w, y + 10 * k); c.stroke();
+  c.fillStyle = "#4E3212"; c.font = "600 " + Math.round(30 * k) + "px " + FONT_DISPLAY; c.textAlign = "center"; c.textBaseline = "middle";
+  c.fillText("?", cx, y + h * 0.58);
+  return { cx, cy: y + h / 2, top: y, w, h };
+}
+
+function stdSize(v, k) { return v >= 1 ? [24 * k, 24 * k] : v >= 0.5 ? [19 * k, 18 * k] : [13 * k, 12 * k]; }
+function drawStd(v, x, bottom, k) {
+  const [w, h] = stdSize(v, k), c = ctx;
+  const g = c.createLinearGradient(x, 0, x + w, 0); g.addColorStop(0, "#A77822"); g.addColorStop(0.5, "#F3D47E"); g.addColorStop(1, "#9E701E");
+  rr(c, x, bottom - h, w, h, 3 * k); c.fillStyle = g; c.fill(); c.lineWidth = 1; c.strokeStyle = "#6B4D12"; c.stroke();
+  c.fillStyle = "#3D2A05"; c.font = "600 " + Math.max(8, Math.round(9 * k)) + "px " + FONT_MONO; c.textAlign = "center"; c.textBaseline = "middle";
+  c.fillText(v >= 1 ? "1" : v >= 0.5 ? ".5" : ".1", x + w / 2, bottom - h / 2 + 0.5);
+}
+
+/* ---------- screen 1 scenes ---------- */
+function weightLen(N, k) { return N <= 0 ? 0 : Math.max(10, N * 1.55 * k); }
+
+function sceneScale(k, gy) {
+  const s = state.s1, L = LOC[s.loc], O = OBJ[s.obj];
+  const reading = L.free ? 0 : O.m * L.g;
+  const cx = W * 0.47, sw = 210 * k, sh = 50 * k, top = gy - sh;
+  const press = L.free ? 0 : Math.min(6 * k, reading * 0.06 * k);
+  rr(ctx, cx - sw / 2, top, sw, sh, 10 * k); ctx.fillStyle = "#4C5668"; ctx.fill();
+  const plateTop = top - 11 * k + press;
+  rr(ctx, cx - sw / 2 - 6 * k, plateTop, sw + 12 * k, 12 * k, 6 * k); ctx.fillStyle = "#C9D1DC"; ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = "#5A6577"; ctx.stroke();
+  rr(ctx, cx + 6 * k, top + 11 * k, 94 * k, 30 * k, 6 * k); ctx.fillStyle = "#D5E8CB"; ctx.fill();
+  ctx.fillStyle = "#16301A"; ctx.font = "600 " + Math.round(18 * k) + "px " + FONT_MONO; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(reading.toFixed(1) + " N", cx + 53 * k, top + 26.5 * k);
+  const bob = L.free && !reduceMotion ? Math.sin(sim.t * 1.5) * 6 * k : 0;
+  const bottom = L.free ? plateTop - 44 * k + bob : plateTop;
+  const ob = drawObject(s.obj, cx, bottom, k);
+  if (s.showForces) {
+    const wN = O.m * L.g, len = weightLen(wN, k);
+    const gx = cx - 14 * k;
+    forceArrow(ctx, gx, ob.cy, gx, ob.cy + len, C.force, { w: 7 * k + 2, hw: 20 * k + 4, hl: 15 * k + 2 });
+    tag(ctx, "Gravity " + wN.toFixed(1) + " N", gx - 12 * k, ob.cy + Math.max(len * 0.55, 18 * k), { align: "right", size: Math.round(13 * Math.max(k, 0.85)), color: "#A43A0E", stroke: "#F1B79C" });
+    if (!L.free) {
+      const nx = cx + 16 * k;
+      forceArrow(ctx, nx, plateTop, nx, plateTop - len, C.support, { w: 7 * k + 2, hw: 20 * k + 4, hl: 15 * k + 2 });
+      tag(ctx, "Scale pushes up " + reading.toFixed(1) + " N", nx + 12 * k, plateTop - Math.max(len * 0.6, 20 * k), { align: "left", size: Math.round(13 * Math.max(k, 0.85)), color: "#14603D", stroke: "#A8D9BE" });
+    } else {
+      tag(ctx, "Scale pushes up 0 N", cx + sw / 2 + 10 * k, plateTop - 8 * k, { align: "left", size: Math.round(13 * Math.max(k, 0.85)), color: "#14603D", stroke: "#A8D9BE" });
+    }
+  }
+}
+
+function sceneBalance(k, gy, dt) {
+  const s = state.s1, L = LOC[s.loc], O = OBJ[s.obj];
+  const mR = s.std.reduce((a, b) => a + b, 0), diff = O.m - mR;
+  const b = sim.bal;
+  if (!L.free) {
+    const target = -clamp(diff * 9, -15, 15) * Math.PI / 180;
+    if (reduceMotion) { b.a = target; b.v = 0; }
+    else {
+      const kk = 26 * (L.g / 9.8), cdamp = 2.2 * Math.sqrt(kk) * 0.35;
+      b.v += (-kk * (b.a - target) - cdamp * b.v) * dt; b.a += b.v * dt;
+    }
+  } else if (!reduceMotion) {
+    const target = 0.09 * Math.sin(sim.t * 0.4);
+    b.v += (-(b.a - target) * 0.5 - b.v * 0.6) * dt; b.a += b.v * dt;
+  }
+  const cx = W * 0.47, pivotY = gy - 112 * k, half = 165 * k, postH = 34 * k, panW = 134 * k;
+  ctx.fillStyle = "#3E4859";
+  ctx.beginPath(); ctx.moveTo(cx - 78 * k, gy); ctx.lineTo(cx + 78 * k, gy); ctx.lineTo(cx + 56 * k, gy - 20 * k); ctx.lineTo(cx - 56 * k, gy - 20 * k); ctx.closePath(); ctx.fill();
+  ctx.fillRect(cx - 9 * k, pivotY, 18 * k, gy - 20 * k - pivotY);
+  rr(ctx, cx - 36 * k, pivotY - 70 * k, 72 * k, 40 * k, 8 * k); ctx.fillStyle = "#F4F6F9"; ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = "#5A6577"; ctx.stroke();
+  ctx.strokeStyle = "#5A6577"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx, pivotY - 66 * k); ctx.lineTo(cx, pivotY - 58 * k); ctx.stroke();
+  const ca = Math.cos(b.a), sa = Math.sin(b.a);
+  const lx = cx - half * ca, ly = pivotY - half * sa, rx = cx + half * ca, ry = pivotY + half * sa;
+  ctx.save(); ctx.translate(cx, pivotY); ctx.rotate(b.a);
+  rr(ctx, -half - 8 * k, -7 * k, 2 * half + 16 * k, 14 * k, 7 * k); ctx.fillStyle = "#7D8796"; ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = "#3E4859"; ctx.stroke();
+  ctx.strokeStyle = C.force; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -62 * k); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle = "#3E4859"; ctx.beginPath(); ctx.arc(cx, pivotY, 7 * k, 0, 6.283); ctx.fill();
+  const pans = [[lx, ly], [rx, ry]].map(([x, y]) => {
+    ctx.fillStyle = "#5A6577"; ctx.fillRect(x - 4 * k, y - postH, 8 * k, postH);
+    rr(ctx, x - panW / 2, y - postH - 9 * k, panW, 9 * k, 4 * k); ctx.fillStyle = "#AEB8C6"; ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = "#4B5566"; ctx.stroke();
+    return { x, top: y - postH - 9 * k };
+  });
+  const lift = (i) => L.free ? (24 * k + (reduceMotion ? 0 : Math.sin(sim.t * 1.3 + i * 1.7) * 7 * k)) : 0;
+  drawObject(s.obj, pans[0].x, pans[0].top - lift(0), k);
+  const sorted = s.std.slice().sort((a, b2) => b2 - a);
+  let rowX = pans[1].x - panW / 2 + 6 * k, rowBottom = pans[1].top, rowH = 0, i = 0;
+  for (const v of sorted) {
+    const [w, h] = stdSize(v, k);
+    if (rowX + w > pans[1].x + panW / 2 - 4 * k) { rowX = pans[1].x - panW / 2 + 6 * k; rowBottom -= rowH; rowH = 0; }
+    drawStd(v, rowX, rowBottom - lift(++i), k);
+    rowX += w + 3 * k; rowH = Math.max(rowH, h);
+  }
+  let text, col, bg, st;
+  if (L.free) { text = "Nothing presses on the pans"; col = "#A2411A"; bg = "#FBEAE1"; st = "#F1C2AB"; }
+  else if (Math.abs(diff) < 1e-6) { text = "Balanced"; col = "#17734A"; bg = "#E2F3E9"; st = "#A8D9BE"; }
+  else if (diff > 0) { text = "Left side is heavier"; col = "#1D4A9E"; bg = "#DCE7FA"; st = "#AFC6EE"; }
+  else { text = "Right side is heavier"; col = "#1D4A9E"; bg = "#DCE7FA"; st = "#AFC6EE"; }
+  tag(ctx, text, cx, pivotY - 92 * k, { size: Math.round(14 * Math.max(k, 0.85)), color: col, bg, stroke: st });
+  tag(ctx, "Right pan: " + mR.toFixed(1) + " kg", pans[1].x, gy + (H - gy) * 0.45, { size: Math.round(13 * Math.max(k, 0.85)), font: FONT_MONO, weight: 500 });
+  tag(ctx, OBJ[s.obj].title, pans[0].x, gy + (H - gy) * 0.45, { size: Math.round(13 * Math.max(k, 0.85)), weight: 500 });
+}
+
+function scenePush(k, gy, dt) {
+  const s = state.s1, L = LOC[s.loc], O = OBJ[s.obj], p = sim.push;
+  if (p.phase === "pushing") {
+    const a = PUSH_F / O.m; p.v += a * dt; p.x += p.v * dt; p.t += dt;
+    if (p.t >= PUSH_T) { p.phase = "coasting"; p.a = a; refreshS1(); announce("Acceleration " + a.toFixed(2) + " meters per second squared."); }
+  } else if (p.phase === "coasting") {
+    p.x += p.v * dt;
+    if (p.x >= TRACK_M) { p.x = TRACK_M; p.phase = "done"; refreshS1(); }
+  }
+  const x0 = W * 0.06, x1 = W * 0.94, railY = gy - 30 * k;
+  ctx.fillStyle = "#5E6979";
+  for (const lx of [x0 + 24 * k, x1 - 24 * k]) ctx.fillRect(lx - 4 * k, railY + 8 * k, 8 * k, gy - railY - 8 * k);
+  rr(ctx, x0, railY, x1 - x0, 10 * k, 5 * k); ctx.fillStyle = "#9AA6B5"; ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = "#566173"; ctx.stroke();
+  const cw = 104 * k, startL = x0 + 64 * k, endL = x1 - 66 * k - cw;
+  const cartL = startL + (p.x / TRACK_M) * (endL - startL);
+  ctx.fillStyle = "#2F394A"; ctx.font = "500 " + Math.max(10, Math.round(11 * k)) + "px " + FONT_MONO; ctx.textAlign = "center"; ctx.textBaseline = "top";
+  for (let m = 0; m <= TRACK_M + 1e-9; m += 0.5) {
+    const tx = startL + cw / 2 + (m / TRACK_M) * (endL - startL);
+    ctx.fillRect(tx - 0.75, railY + 12 * k, 1.5, (m % 1 === 0 ? 9 : 5) * k);
+    if (m % 1 === 0) ctx.fillText(m + " m", tx, railY + 23 * k);
+  }
+  rr(ctx, x0 + 6 * k, railY - 58 * k, 50 * k, 54 * k, 7 * k); ctx.fillStyle = "#3F4A5C"; ctx.fill();
+  ctx.fillStyle = "#FFFFFF"; ctx.font = "600 " + Math.max(9, Math.round(10 * k)) + "px " + FONT_UI; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("PUSHER", x0 + 31 * k, railY - 31 * k);
+  const pistonEnd = p.phase === "pushing" ? cartL : x0 + 56 * k + 8 * k;
+  ctx.fillStyle = "#8C97A6"; ctx.fillRect(x0 + 56 * k, railY - 34 * k, Math.max(0, pistonEnd - (x0 + 56 * k)), 8 * k);
+  rr(ctx, x1 - 60 * k, railY - 56 * k, 50 * k, 48 * k, 7 * k); ctx.fillStyle = "#2F394A"; ctx.fill();
+  ctx.fillStyle = "#9CC3FF"; ctx.beginPath(); ctx.arc(x1 - 60 * k, railY - 32 * k, 7 * k, 0, 6.283); ctx.fill();
+  if (p.phase === "pushing" || p.phase === "coasting") {
+    ctx.strokeStyle = "rgba(60,120,220,.55)"; ctx.lineWidth = 2;
+    for (let i = 1; i <= 3; i++) { ctx.beginPath(); ctx.arc(x1 - 60 * k, railY - 32 * k, (10 + i * 9) * k, Math.PI * 0.75, Math.PI * 1.25); ctx.stroke(); }
+  }
+  ctx.fillStyle = "#FFFFFF"; ctx.font = "600 " + Math.max(9, Math.round(10 * k)) + "px " + FONT_UI; ctx.fillText("SENSOR", x1 - 35 * k, railY - 15 * k);
+  const ct = railY - 22 * k;
+  ctx.beginPath(); ctx.moveTo(cartL, railY + 2 * k); ctx.lineTo(cartL + 12 * k, ct); ctx.lineTo(cartL + cw - 12 * k, ct); ctx.lineTo(cartL + cw, railY + 2 * k); ctx.closePath();
+  ctx.fillStyle = "#E8EDF3"; ctx.fill(); ctx.lineWidth = 1.4; ctx.strokeStyle = "#4B5566"; ctx.stroke();
+  const ob = drawObject(s.obj, cartL + cw / 2, ct, k);
+  if (s.showForces && p.phase === "pushing") {
+    forceArrow(ctx, ob.cx, ob.cy, ob.cx + 72 * k, ob.cy, C.force, { w: 7 * k + 2, hw: 20 * k + 4, hl: 15 * k + 2 });
+    tag(ctx, "Push 10 N", ob.cx + 40 * k, ob.cy - 24 * k, { size: Math.round(13 * Math.max(k, 0.85)), color: "#A43A0E", stroke: "#F1B79C" });
+  }
+  if (p.a != null) tag(ctx, "a = " + p.a.toFixed(2) + " m/s²", W * 0.5, H * 0.2, { size: Math.round(16 * Math.max(k, 0.85)), font: FONT_MONO, stroke: "#C4CFDD" });
+}
+
+function drawS1(dt) {
+  const s = state.s1, L = LOC[s.loc];
+  const k = clamp(W / 860, 0.56, 1.3), gy = Math.round(H * 0.76);
+  backdrop(s.loc, k, gy);
+  if (s.tool === "scale") sceneScale(k, gy);
+  else if (s.tool === "balance") sceneBalance(k, gy, dt);
+  else scenePush(k, gy, dt);
+  const fs = Math.round(13 * Math.max(k, 0.9));
+  tag(ctx, L.name + " · gravity " + L.g.toFixed(1) + " N/kg", 14 * k + 8, 22 * k + 6, { align: "left", size: fs, stroke: "#C4CFDD" });
+  if (L.free) {
+    const msg = s.tool === "scale" ? "Gravity still pulls, but everything falls together, so the scale reads 0."
+      : s.tool === "balance" ? "In free fall, nothing presses on the pans, so the balance can't compare."
+      : "This test still works in orbit. NASA measures astronaut mass this way.";
+    tag(ctx, msg, W / 2, 22 * k + 6 + fs + 16, { size: Math.round(12 * Math.max(k, 0.9)), weight: 500, color: "#1D4A9E", bg: "#DCE7FA", stroke: "#AFC6EE" });
+  }
+}
+
+/* ---------- screen 2 ---------- */
+let s2Geom = null;
+function drawS2() {
+  const s = state.s2, k = clamp(W / 860, 0.56, 1.3);
+  let g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#F7FAFD"); g.addColorStop(1, "#E2E9F2");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = "rgba(44,102,208,.07)"; ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 32) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 32) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  const pad = 30 * k + 10, X0 = pad, X1 = W - pad, ppm = (X1 - X0) / 10;
+  const cy = H * 0.5, rulerY = H * 0.78;
+  rr(ctx, X0 - 12, rulerY, (X1 - X0) + 24, 36 * k + 6, 6); ctx.fillStyle = "#FFFBEA"; ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = "#B49A4A"; ctx.stroke();
+  ctx.fillStyle = "#5A4A14"; ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.font = "500 " + Math.max(10, Math.round(11 * k)) + "px " + FONT_MONO;
+  for (let m = 0; m <= 10; m += 0.5) {
+    const x = X0 + m * ppm, major = m % 1 === 0;
+    ctx.fillRect(x - 0.6, rulerY, 1.2, (major ? 12 : 7) * k);
+    if (major) ctx.fillText(String(m), x, rulerY + 14 * k);
+  }
+  ctx.textAlign = "right"; ctx.fillText("meters", X1 + 8, rulerY + 26 * k + 2);
+  const x1 = X0 + s.x1 * ppm, x2 = X0 + s.x2 * ppm, R1 = radM(s.m1) * ppm, R2 = radM(s.m2) * ppm;
+  ctx.fillStyle = "rgba(44,102,208,.18)"; ctx.fillRect(x1, rulerY + 1, x2 - x1, 10 * k);
+  ctx.setLineDash([4, 4]); ctx.strokeStyle = "rgba(21,32,51,.45)"; ctx.lineWidth = 1.2;
+  for (const x of [x1, x2]) { ctx.beginPath(); ctx.moveTo(x, cy); ctx.lineTo(x, rulerY); ctx.stroke(); }
+  ctx.setLineDash([]);
+  const r = s.x2 - s.x1;
+  tag(ctx, "r = " + r.toFixed(r < 10 ? 2 : 1).replace(/0$/, "") + " m", (x1 + x2) / 2, rulerY - 14 * k, { size: Math.round(13 * Math.max(k, 0.85)), font: FONT_MONO, weight: 500, stroke: "#C4CFDD" });
+  const close = (x2 - x1) < 150 * Math.max(k, 0.8);
+  const ball = (x, R, col, lab, m, drop) => {
+    const gr = ctx.createRadialGradient(x - R * 0.35, cy - R * 0.4, R * 0.1, x, cy, R);
+    gr.addColorStop(0, "#FFFFFF"); gr.addColorStop(0.25, col); gr.addColorStop(1, shade(col));
+    ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, cy, R, 0, 6.283); ctx.fill();
+    ctx.lineWidth = 1.2; ctx.strokeStyle = "rgba(15,20,32,.6)"; ctx.stroke();
+    tag(ctx, lab + " = " + m + " kg", x, cy + Math.max(R, 10) + 16 * k + drop, { size: Math.round(13 * Math.max(k, 0.85)), color: col === C.m1 ? "#1E4FB0" : "#A72D27", stroke: "#C4CFDD" });
+  };
+  ball(x1, R1, C.m1, "m₁", s.m1, 0); ball(x2, R2, C.m2, "m₂", s.m2, close ? 26 * Math.max(k, 0.85) : 0);
+  s2Geom = { X0, ppm, cy, x1, x2, R1, R2 };
+  const F = forceS2();
+  const scale = 105 * k / 6.67e-7;
+  const maxL = Math.min(W * 0.4, 330 * k);
+  let L = F * scale, capped = false;
+  if (L > maxL) { L = maxL; capped = true; }
+  const maxR = 0.55 * ppm;
+  const ya = cy - Math.max(R1, R2, maxR * 0.6) - 30 * k, yb = ya - 44 * k;
+  const aw = { w: 7 * k + 2, hw: 20 * k + 4, hl: 15 * k + 2 };
+  ctx.setLineDash([2, 4]); ctx.strokeStyle = "rgba(21,32,51,.4)";
+  ctx.beginPath(); ctx.moveTo(x1, cy - R1); ctx.lineTo(x1, ya); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2, cy - R2); ctx.lineTo(x2, yb); ctx.stroke();
+  ctx.setLineDash([]);
+  if (L >= 1) {
+    forceArrow(ctx, x1, ya, x1 + L, ya, C.force, aw);
+    forceArrow(ctx, x2, yb, x2 - L, yb, C.force, aw);
+    if (capped) for (const [x, y, d] of [[x1 + L * 0.5, ya, 1], [x2 - L * 0.5, yb, -1]]) {
+      ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = 2.5;
+      for (const o of [-4, 4]) { ctx.beginPath(); ctx.moveTo(x + o - 4 * d, y + 8); ctx.lineTo(x + o + 4 * d, y - 8); ctx.stroke(); }
+    }
+  }
+  if (s.values) {
+    const fs = Math.round(13 * Math.max(k, 0.85));
+    const t1 = "Force on m₁ by m₂: " + fmtForce(F, s.sci), t2 = "Force on m₂ by m₁: " + fmtForce(F, s.sci);
+    ctx.font = "600 " + fs + "px " + FONT_UI;
+    const w1 = ctx.measureText(t1).width, w2 = ctx.measureText(t2).width;
+    const lx1 = clamp(x1 + L / 2, w1 / 2 + 12, W - w1 / 2 - 12), lx2 = clamp(x2 - L / 2, w2 / 2 + 12, W - w2 / 2 - 12);
+    tag(ctx, t1, lx1, ya - 22 * k, { size: fs, color: "#A43A0E", stroke: "#F1B79C" });
+    tag(ctx, t2, lx2, yb - 22 * k, { size: fs, color: "#A43A0E", stroke: "#F1B79C" });
+  }
+  if (capped) tag(ctx, "Arrows too long to fit: read the numbers", W / 2, H - 14 * k - 4, { size: Math.round(12 * Math.max(k, 0.9)), weight: 500, color: "#4A5669" });
+}
+function shade(hex) {
+  const n = parseInt(hex.slice(1), 16), r = (n >> 16) & 255, g2 = (n >> 8) & 255, b = n & 255, f = 0.55;
+  return "rgb(" + Math.round(r * f) + "," + Math.round(g2 * f) + "," + Math.round(b * f) + ")";
+}
+
+/* ---------- screen 3 ---------- */
+let s3Geom = null;
+function drawS3() {
+  const k = clamp(W / 860, 0.56, 1.3), r = state.s3.r;
+  let g = ctx.createLinearGradient(0, 0, W, H); g.addColorStop(0, "#050A18"); g.addColorStop(1, "#13203F");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  drawStars(ctx, W, H, sim.t);
+  const x0 = W * 0.12, xr = W - 36 * k - 6, Rp = (xr - x0) / 10, cy = H * 0.46;
+  s3Geom = { x0, Rp, cy };
+  const glow = ctx.createRadialGradient(x0, cy, Rp * 0.9, x0, cy, Rp * 1.18);
+  glow.addColorStop(0, "rgba(120,180,255,.45)"); glow.addColorStop(1, "rgba(120,180,255,0)");
+  ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x0, cy, Rp * 1.18, 0, 6.283); ctx.fill();
+  const eg = ctx.createRadialGradient(x0 - Rp * 0.3, cy - Rp * 0.3, Rp * 0.1, x0, cy, Rp);
+  eg.addColorStop(0, "#5FA2F2"); eg.addColorStop(1, "#1C4F9C");
+  ctx.fillStyle = eg; ctx.beginPath(); ctx.arc(x0, cy, Rp, 0, 6.283); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.arc(x0, cy, Rp, 0, 6.283); ctx.clip();
+  ctx.fillStyle = "#4E9A57";
+  for (const [dx, dy, a, b2, rot] of [[-0.3, -0.35, 0.45, 0.25, 0.4], [0.25, 0.2, 0.35, 0.22, -0.6], [-0.1, 0.55, 0.3, 0.15, 0.2]]) {
+    ctx.beginPath(); ctx.ellipse(x0 + dx * Rp, cy + dy * Rp, a * Rp, b2 * Rp, rot, 0, 6.283); ctx.fill();
+  }
+  ctx.fillStyle = "rgba(255,255,255,.65)";
+  ctx.beginPath(); ctx.ellipse(x0 + 0.1 * Rp, cy - 0.1 * Rp, 0.55 * Rp, 0.08 * Rp, -0.3, 0, 6.283); ctx.fill();
+  ctx.restore();
+  const fsS = Math.round(12 * Math.max(k, 0.9));
+  const orbits = [[1.0628, "ISS orbit", -62], [4.17, "GPS satellites", -40], [6.62, "Geostationary satellites", -25]];
+  for (const [ro, name, angDeg] of orbits) {
+    ctx.setLineDash([5, 6]); ctx.strokeStyle = "rgba(200,220,255,.45)"; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.arc(x0, cy, ro * Rp, -Math.PI / 2, Math.PI / 2); ctx.stroke(); ctx.setLineDash([]);
+    const a = angDeg * Math.PI / 180;
+    let lx = x0 + ro * Rp * Math.cos(a), ly = cy + ro * Rp * Math.sin(a);
+    if (name === "ISS orbit") {
+      const tx = x0 + Rp * 1.45, ty = cy - Rp * 1.12;
+      ctx.strokeStyle = "rgba(200,220,255,.7)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(tx - 4, ty + 6); ctx.stroke();
+      lx = tx; ly = ty;
+      tag(ctx, name + " (" + ro.toFixed(2) + " Earth radii)", lx, ly, { align: "left", size: fsS, weight: 500, color: "#DCE7FA", bg: "rgba(10,20,45,.8)" });
+    } else if (ly > 14) {
+      tag(ctx, name, lx + 6, ly, { align: "left", size: fsS, weight: 500, color: "#DCE7FA", bg: "rgba(10,20,45,.8)" });
+    }
+  }
+  const axY = H - 30 * k - 4;
+  ctx.strokeStyle = "rgba(220,231,250,.7)"; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x0, axY); ctx.lineTo(xr, axY); ctx.stroke();
+  ctx.fillStyle = "#DCE7FA"; ctx.font = "500 " + Math.max(10, Math.round(11 * k)) + "px " + FONT_MONO; ctx.textAlign = "center"; ctx.textBaseline = "top";
+  for (let n = 0; n <= 10; n++) { const x = x0 + n * Rp; ctx.fillRect(x - 0.6, axY - 4, 1.2, 8); if (n > 0) ctx.fillText(String(n), x, axY + 6); }
+  tag(ctx, "Distance in Earth radii from Earth's center", x0 + 4, axY - 14, { align: "left", size: Math.max(10, Math.round(11 * Math.max(k, 0.9))), weight: 500, color: "#DCE7FA", bg: "rgba(10,20,45,.8)" });
+  tag(ctx, "Moon: 60 Earth radii →", W - 10, 18 * k + 6, { align: "right", size: fsS, weight: 500, color: "#DCE7FA", bg: "rgba(10,20,45,.8)" });
+  const off = r > 10;
+  const px = off ? W - 26 * k : x0 + r * Rp;
+  const pull = pullAt(r);
+  const L = pull * 13.5 * k;
+  if (L >= 1) forceArrow(ctx, px - 10 * k, cy, px - 10 * k - L, cy, C.force, { w: 6 * k + 2, hw: 18 * k + 4, hl: 14 * k + 2 });
+  ctx.fillStyle = "#C9D3E2"; ctx.fillRect(px - 15 * k, cy - 4 * k, 30 * k, 8 * k);
+  ctx.fillStyle = "#3B71C8"; ctx.fillRect(px - 15 * k, cy - 16 * k, 30 * k, 10 * k); ctx.fillRect(px - 15 * k, cy + 6 * k, 30 * k, 10 * k);
+  ctx.strokeStyle = "#9FB9E6"; ctx.lineWidth = 1;
+  for (const yy of [cy - 11 * k, cy + 11 * k]) { ctx.beginPath(); ctx.moveTo(px - 15 * k, yy); ctx.lineTo(px + 15 * k, yy); ctx.stroke(); }
+  ctx.fillStyle = "#F3F6FA"; rr(ctx, px - 7 * k, cy - 7 * k, 14 * k, 14 * k, 2 * k); ctx.fill();
+  ctx.strokeStyle = "#F3F6FA"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(px + 7 * k, cy - 7 * k); ctx.lineTo(px + 13 * k, cy - 22 * k); ctx.stroke();
+  s3Geom.px = px;
+  const lab = (off ? "At the Moon's distance: " : "") + "Earth's pull " + fmtPull(pull) + " N";
+  ctx.font = "600 " + Math.round(13 * Math.max(k, 0.85)) + "px " + FONT_UI;
+  const lw = ctx.measureText(lab).width;
+  tag(ctx, lab, clamp(px, lw / 2 + 12, W - lw / 2 - 12), cy + 30 * k + 10, { size: Math.round(13 * Math.max(k, 0.85)), color: "#A43A0E", stroke: "#F1B79C" });
+}
+
+function drawGraph() {
+  const c = gctx, w = GW, h = GH, s = state.s3;
+  c.setTransform(DPR, 0, 0, DPR, 0, 0);
+  c.fillStyle = "#FFFFFF"; c.fillRect(0, 0, w, h);
+  const L = 40, R = 10, T = 12, B = 34;
+  const px = r => L + (r - 1) / 9 * (w - L - R), py = f => T + (1 - f / 10) * (h - T - B);
+  c.strokeStyle = "#E3E8EF"; c.lineWidth = 1; c.font = "500 11px " + FONT_MONO; c.fillStyle = "#4A5669";
+  c.textAlign = "right"; c.textBaseline = "middle";
+  for (let f = 0; f <= 10; f += 2) { c.beginPath(); c.moveTo(L, py(f)); c.lineTo(w - R, py(f)); c.stroke(); c.fillText(String(f), L - 6, py(f)); }
+  c.textAlign = "center"; c.textBaseline = "top";
+  for (let r = 1; r <= 10; r++) { c.beginPath(); c.moveTo(px(r), T); c.lineTo(px(r), h - B); c.stroke(); c.fillText(String(r), px(r), h - B + 4); }
+  c.font = "500 11px " + FONT_UI; c.fillText("Earth radii from Earth's center", L + (w - L - R) / 2, h - 14);
+  c.save(); c.translate(11, T + (h - T - B) / 2); c.rotate(-Math.PI / 2); c.textBaseline = "middle"; c.fillText("Pull (N)", 0, 0); c.restore();
+  c.strokeStyle = "#8BA6D6"; c.lineWidth = 2; c.beginPath();
+  for (let r = 1; r <= 10.0001; r += 0.05) { const x = px(r), y = py(pullAt(r)); if (r === 1) c.moveTo(x, y); else c.lineTo(x, y); }
+  c.stroke();
+  c.fillStyle = "#2C66D0";
+  for (const p of s.points) { if (p.r <= 10) { c.beginPath(); c.arc(px(p.r), py(p.f), 4.5, 0, 6.283); c.fill(); } }
+  if (s.r <= 10) {
+    c.fillStyle = C.force; c.strokeStyle = "#FFFFFF"; c.lineWidth = 2;
+    c.beginPath(); c.arc(px(s.r), py(pullAt(s.r)), 6, 0, 6.283); c.fill(); c.stroke();
+  } else {
+    c.fillStyle = "#A43A0E"; c.textAlign = "right"; c.textBaseline = "top"; c.font = "500 11px " + FONT_UI;
+    c.fillText("Moon's distance is off this graph →", w - R, T + 2);
+  }
+}
+
+/* ---------- main loop ---------- */
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now; sim.t += dt;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  if (state.screen === 1) drawS1(dt);
+  else if (state.screen === 2) drawS2();
+  else { drawS3(); drawGraph(); }
+  requestAnimationFrame(frame);
+}
+
+/* ---------- live text ---------- */
+let liveTimer = null;
+function announce(text) { clearTimeout(liveTimer); liveTimer = setTimeout(() => { $("#live").textContent = text; }, 250); }
+
+/* ---------- screen 1 UI ---------- */
+function resetPush() { Object.assign(sim.push, { x: 0, v: 0, t: 0, phase: "ready", a: null }); }
+function s1Reading() {
+  const s = state.s1, L = LOC[s.loc], O = OBJ[s.obj];
+  if (s.tool === "scale") return { text: (L.free ? 0 : O.m * L.g).toFixed(1) + " N", ready: true };
+  if (s.tool === "balance") {
+    const mR = s.std.reduce((a, b) => a + b, 0), bal = !L.free && Math.abs(O.m - mR) < 1e-6;
+    return { text: mR.toFixed(1) + " kg" + (L.free ? " (floating)" : bal ? " (balanced)" : " (not balanced)"), ready: true };
+  }
+  const p = sim.push;
+  return { text: p.a == null ? "—" : "a = " + p.a.toFixed(2) + " m/s²", ready: p.a != null };
+}
+function refreshS1() {
+  const s = state.s1, L = LOC[s.loc], O = OBJ[s.obj];
+  $("#gNote").innerHTML = "Gravity here: <b>" + L.g.toFixed(1) + " N/kg</b>" + (L.free ? " (still pulling)" : "");
+  $("#balanceCtl").hidden = s.tool !== "balance";
+  $("#pushCtl").hidden = s.tool !== "push";
+  const lab = $("#rdLabel"), val = $("#rdValue"), sub = $("#rdSub");
+  const nm = "the " + O.name;
+  if (s.tool === "scale") {
+    const r = L.free ? 0 : O.m * L.g;
+    lab.textContent = "Scale reads"; val.textContent = r.toFixed(1) + " N";
+    sub.innerHTML = L.free ? "Everything here is falling around Earth together, so " + nm + " doesn't press on the scale."
+      : "At rest, the scale shows the weight of " + nm + " on " + L.name + ".";
+  } else if (s.tool === "balance") {
+    const mR = s.std.reduce((a, b) => a + b, 0), d = O.m - mR;
+    lab.textContent = "Right pan holds"; val.textContent = mR.toFixed(1) + " kg";
+    sub.innerHTML = L.free ? '<span class="pill warn">Can\'t compare in free fall</span>'
+      : Math.abs(d) < 1e-6 ? '<span class="pill ok">Balanced: same mass on both sides</span>'
+      : d > 0 ? '<span class="pill">Left side is heavier: add mass</span>' : '<span class="pill">Right side is heavier: take some off</span>';
+  } else {
+    const p = sim.push;
+    lab.textContent = "Push test: 10.0 N push";
+    val.textContent = p.a == null ? (p.phase === "pushing" ? "measuring…" : "a = —") : "a = " + p.a.toFixed(2) + " m/s²";
+    let t = p.a != null ? "The sensor measured the acceleration."
+      : p.phase === "pushing" ? "The sensor is timing how quickly " + nm + " speeds up."
+      : "Press Push. The sensor measures how quickly " + nm + " speeds up.";
+    if (s.showMass && p.a != null) t += " Mass = F ÷ a = 10.0 ÷ " + p.a.toFixed(2) + " = <b>" + (PUSH_F / p.a).toFixed(2) + " kg</b>";
+    sub.innerHTML = t;
+  }
+  $("#pushBtn").textContent = sim.push.phase === "ready" ? "Push (10 N)" : "Push again (10 N)";
+  $("#record1").disabled = !s1Reading().ready;
+  canvas.setAttribute("aria-label", OBJ[s.obj].title + " with the " + TOOL[s.tool].toLowerCase() + " on " + L.name + ". " + lab.textContent + " " + val.textContent + ".");
+}
+
+/* ---------- screen 2 UI ---------- */
+function refreshS2() {
+  const s = state.s2, F = forceS2(), r = s.x2 - s.x1;
+  $("#m1").value = s.m1; $("#m2").value = s.m2; $("#dist").value = r.toFixed(1);
+  $("#m1Out").textContent = s.m1 + " kg"; $("#m2Out").textContent = s.m2 + " kg"; $("#distOut").textContent = r.toFixed(2).replace(/0$/, "") + " m";
+  $("#fValue").textContent = fmtForce(F, s.sci);
+  $("#showValues").checked = s.values; $("#sciNote").checked = s.sci; $("#showMath").checked = s.math;
+  const mb = $("#mathBox");
+  mb.hidden = !s.math;
+  if (s.math) {
+    const rs = r.toFixed(2).replace(/0$/, "");
+    mb.innerHTML = "<div>F = G · m₁ · m₂ ÷ r²</div><div>= (6.67 × 10⁻¹¹)(" + s.m1 + ")(" + s.m2 + ")</div><div>&nbsp;&nbsp;÷ (" + rs + ")²</div><div>= " + fmtForce(F, s.sci) + "</div>";
+  }
+  canvas.setAttribute("aria-label", "Two balls, m1 " + s.m1 + " kilograms and m2 " + s.m2 + " kilograms, " + r.toFixed(2) + " meters apart. Each pulls the other with " + sci(F) + " newtons.");
+}
+
+/* ---------- screen 3 UI ---------- */
+function refreshS3() {
+  const r = state.s3.r, pull = pullAt(r), km = r * RE_KM;
+  $("#rdist").value = Math.min(10, r);
+  $("#rOut").textContent = r.toFixed(2) + " Earth radii";
+  $("#pullValue").textContent = fmtPull(pull) + " N";
+  const alt = Math.max(0, km - RE_KM);
+  $("#pullSub").innerHTML = "Distance from Earth's center: <b>" + Math.round(km).toLocaleString("en-US") + " km</b>. Height above the ground: <b>" +
+    Math.round(alt).toLocaleString("en-US") + " km</b>. That's <b>" + fmtPct(pull / 9.8 * 100) + "%</b> of its pull on the ground.";
+  canvas.setAttribute("aria-label", "Probe " + r.toFixed(2) + " Earth radii from Earth's center. Earth pulls on it with " + fmtPull(pull) + " newtons.");
+}
+
+/* ---------- data tables ---------- */
+function renderData() {
+  const box = $("#dataBox"), sc = state.screen;
+  let rows, head;
+  if (sc === 1) { rows = state.s1.records; head = ["#", "Location", "Object", "Tool", "Reading"]; }
+  else if (sc === 2) { rows = state.s2.records; head = ["#", "m₁ (kg)", "m₂ (kg)", "r (m)", "Force (N)"]; }
+  else { rows = state.s3.points; head = ["#", "Distance (Earth radii)", "Pull on 1.0 kg (N)"]; }
+  $("#clearData").disabled = rows.length === 0;
+  if (!rows.length) {
+    box.innerHTML = '<p class="empty">' + (sc === 3 ? "No points yet. Move the probe, then press Plot this point." : "No readings yet. Set things up, then press Record reading.") + "</p>";
+    return;
+  }
+  const esc = t => String(t).replace(/[&<>]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[ch]));
+  let html = '<div class="tablewrap"><table class="data"><thead><tr>' + head.map(h => "<th>" + h + "</th>").join("") + "</tr></thead><tbody>";
+  rows.forEach((row, i) => {
+    let cells;
+    if (sc === 1) cells = [i + 1, row.loc, row.obj, row.tool, row.reading];
+    else if (sc === 2) cells = [i + 1, row.m1, row.m2, row.r, row.F];
+    else cells = [i + 1, row.r.toFixed(2), fmtPull(row.f)];
+    html += "<tr>" + cells.map((c, j) => '<td class="' + (j === 0 || sc !== 1 || j === 4 ? "num" : "") + '">' + esc(c) + "</td>").join("") + "</tr>";
+  });
+  html += "</tbody></table></div>";
+  box.innerHTML = html;
+}
+
+/* ---------- challenges ---------- */
+const CH = {
+  1: [
+    { id: "s1a", type: "num", q: "Put the <b>bowling ball</b> on the <b>scale</b> on Earth. Then switch to the <b>Moon</b>. What does the scale read on the Moon?", suffix: "N", ans: 8.0, tol: 0.15,
+      ok: "Yes. 5.0 kg × 1.6 N/kg = 8.0 N. Same ball, less weight.", no: "Not yet. Choose Moon, Bowling ball, and Scale, then read the display." },
+    { id: "s1b", type: "num", q: "Use the <b>balance</b> to find the mass of the <b>mystery box</b>.", suffix: "kg", ans: 3.6, tol: 0.05,
+      ok: "Yes, 3.6 kg. Try the balance on Jupiter too. It still reads 3.6 kg.", no: "Add standard masses to the right pan until the balance says Balanced." },
+    { id: "s1c", type: "mc", q: "Take the <b>bag of rice</b> from Earth to Mars and try all three tools. Which reading changes?",
+      options: ["Only the scale", "Only the balance", "Only the push test", "All three"], ans: 0,
+      ok: "Right. The scale measures weight, and weight depends on gravity. The balance and the push test measure mass.", no: "Try each tool on Earth and then on Mars, and compare." },
+    { id: "s1d", type: "mc", q: "Run the <b>push test</b> on the bowling ball on Earth, then on the Moon. What happens to its acceleration?",
+      options: ["It is bigger on the Moon", "It is smaller on the Moon", "It is the same: 2.00 m/s² in both places"], ans: 2,
+      ok: "Yes. Same push, same mass, same acceleration (a = F ÷ m). Mass doesn't change from place to place.", no: "Run the push test in both places and compare the acceleration." },
+    { id: "s1e", type: "mc", q: "On the <b>ISS</b>, the scale reads 0 N. Is there gravity there?",
+      options: ["No. There is no gravity in orbit.", "Yes, about 8.7 N/kg. The scale reads 0 because everything falls together.", "Yes, but only about 1% as much as on the ground."], ans: 1,
+      ok: "Right. Gravity there is about 89% as strong as on the ground. The station, the scale, and the astronaut all fall around Earth together, so nothing presses on the scale.", no: "Check the gravity value shown for the ISS. Is it zero?" }
+  ],
+  2: [
+    { id: "s2a", type: "num", q: "Set m₁ = 200 kg, m₂ = 200 kg, and r = 2.0 m. What is the force?", prefix: "F =", suffix: "× 10⁻⁷ N", ans: 6.67, tol: 0.06,
+      ok: "Yes. (6.67 × 10⁻¹¹)(200)(200) ÷ 2.0² = 6.67 × 10⁻⁷ N.", no: "Check the force readout, or use the math box." },
+    { id: "s2b", type: "num", q: "Keep r = 2.0 m and double m₁ to 400 kg. How many times as big is the force now?", suffix: "times as big", ans: 2, tol: 0.05,
+      ok: "Yes. Double one mass, double the force.", no: "Divide the new force by the old force." },
+    { id: "s2c", type: "num", q: "Put m₁ back to 200 kg. Now double the distance to 4.0 m. The force is divided by what number?", prefix: "÷", ans: 4, tol: 0.05,
+      ok: "Yes. Double the distance, one-fourth the force. That's the inverse-square pattern.", no: "Divide the force at 2.0 m by the force at 4.0 m." },
+    { id: "s2d", type: "mc", q: "Make m₂ much bigger than m₁. Which ball feels the bigger pull?",
+      options: ["m₁", "m₂", "Neither. The two pulls are equal."], ans: 2,
+      ok: "Right. Each ball pulls on the other equally hard. The two arrows always match.", no: "Read both force values. Are they different?" },
+    { id: "s2e", type: "mc", q: "Set both masses to 60 kg (about the mass of two students) and r = 1.0 m. How big is the pull?",
+      options: ["More than 1 N", "About 1 N", "Far less than 1 N"], ans: 2,
+      ok: "Yes. About 2.4 × 10⁻⁷ N. That's why you never feel pulled toward your lab partner.", no: "Look at the power of 10 in the force readout." }
+  ],
+  3: [
+    { id: "s3a", type: "num", q: "Press <b>ISS orbit</b>. About what percent of its ground-level pull does the probe still feel?", suffix: "%", ans: 89, tol: 2,
+      ok: "Yes, about 89%. Gravity in orbit is far from zero.", no: "Read the percent in the readout under Earth's pull." },
+    { id: "s3b", type: "num", q: "Move the probe to <b>2 Earth radii</b> from Earth's center. What is Earth's pull on the 1.0-kg probe?", suffix: "N", ans: 2.45, tol: 0.06,
+      ok: "Yes. Double the distance, one-fourth the pull: 9.8 ÷ 4 = 2.45 N.", no: "Use the 2 Earth radii button, then read the pull." },
+    { id: "s3c", type: "num", q: "Now move to <b>3 Earth radii</b>. Compared with the ground, the pull is divided by what number?", prefix: "÷", ans: 9, tol: 0.2,
+      ok: "Yes. Three times the distance, one-ninth the pull. Distance × n means pull ÷ n².", no: "Divide 9.8 N by the pull at 3 Earth radii." },
+    { id: "s3d", type: "mc", q: "Press <b>Moon's distance</b>. Is Earth's pull zero there?",
+      options: ["Yes, it's zero.", "No. It's tiny, but not zero.", "It's the same as on the ground."], ans: 1,
+      ok: "Right. About 0.0027 N on 1 kg. Tiny, but it's what keeps the Moon in orbit.", no: "Read the pull at the Moon's distance. Is it exactly 0?" }
+  ]
+};
+function renderChallenges() {
+  const list = $("#challengeList"), sc = state.screen;
+  list.innerHTML = "";
+  CH[sc].forEach(ch => {
+    const saved = state.answers[ch.id] || {};
+    const li = document.createElement("li");
+    if (saved.correct) li.classList.add("done");
+    let inner = '<p class="q">' + ch.q + "</p>";
+    if (ch.type === "num") {
+      inner += '<div class="ans">' + (ch.prefix ? "<span>" + ch.prefix + "</span>" : "") +
+        '<input type="text" inputmode="decimal" autocomplete="off" id="in-' + ch.id + '" aria-label="Your answer" value="' + (saved.value != null ? String(saved.value).replace(/"/g, "") : "") + '">' +
+        (ch.suffix ? "<span>" + ch.suffix + "</span>" : "") + '<button type="button" class="btn" data-check="' + ch.id + '">Check</button></div>';
+    } else {
+      inner += '<div class="ans"><div class="mc" role="radiogroup" aria-label="Choices">' +
+        ch.options.map((o, i) => '<label><input type="radio" name="in-' + ch.id + '" id="in-' + ch.id + "-" + i + '" value="' + i + '"' + (saved.value === i ? " checked" : "") + "> <span>" + o + "</span></label>").join("") +
+        '</div><button type="button" class="btn" data-check="' + ch.id + '">Check</button></div>';
+    }
+    inner += '<p class="fb" id="fb-' + ch.id + '" role="status"' + (saved.result ? "" : " hidden") + "></p>";
+    li.innerHTML = inner;
+    list.appendChild(li);
+    if (saved.result) showFeedback(ch, saved.correct);
+  });
+  updateProgress();
+}
+function showFeedback(ch, correct) {
+  const fb = $("#fb-" + ch.id);
+  fb.hidden = false; fb.className = "fb " + (correct ? "ok" : "no"); fb.textContent = correct ? ch.ok : ch.no;
+  const li = fb.closest("li"); if (li) li.classList.toggle("done", !!correct);
+}
+function checkAnswer(id) {
+  const ch = CH[state.screen].find(c => c.id === id); if (!ch) return;
+  let value, correct = false;
+  if (ch.type === "num") {
+    const raw = $("#in-" + id).value.trim().replace(",", ".").replace(/[^0-9.\-eE]/g, "");
+    value = raw; const x = parseFloat(raw);
+    correct = isFinite(x) && Math.abs(x - ch.ans) <= ch.tol;
+    if (raw === "") { const fb = $("#fb-" + id); fb.hidden = false; fb.className = "fb no"; fb.textContent = "Type a number first."; return; }
+  } else {
+    const sel = $('input[name="in-' + id + '"]:checked');
+    if (!sel) { const fb = $("#fb-" + id); fb.hidden = false; fb.className = "fb no"; fb.textContent = "Pick an answer first."; return; }
+    value = parseInt(sel.value, 10); correct = value === ch.ans;
+  }
+  state.answers[id] = { value, correct, result: true };
+  showFeedback(ch, correct);
+  updateProgress();
+}
+function updateProgress() {
+  const list = CH[state.screen], done = list.filter(c => state.answers[c.id] && state.answers[c.id].correct).length;
+  $("#progress").textContent = done + " of " + list.length + " done";
+}
+
+/* ---------- screens ---------- */
+function setScreen(n) {
+  state.screen = n;
+  $$(".tab").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.go === n)));
+  $$(".ctl").forEach(d => { d.hidden = +d.dataset.screen !== n; });
+  $("#screenName").textContent = SCREEN_NAMES[n];
+  renderChallenges(); renderData();
+  if (n === 1) refreshS1(); else if (n === 2) refreshS2(); else refreshS3();
+  resize();
+}
+function syncS1Inputs() {
+  const s = state.s1;
+  $("#loc-" + s.loc).checked = true; $("#obj-" + s.obj).checked = true; $("#tool-" + s.tool).checked = true;
+  $("#showForces").checked = s.showForces; $("#showMass").checked = s.showMass;
+}
+
+/* ---------- events: screen 1 ---------- */
+$$('input[name="loc"]').forEach(el => el.addEventListener("change", () => { state.s1.loc = el.value; resetPush(); refreshS1(); announce(LOC[el.value].name + ". Gravity " + LOC[el.value].g + " newtons per kilogram."); }));
+$$('input[name="obj"]').forEach(el => el.addEventListener("change", () => { state.s1.obj = el.value; resetPush(); refreshS1(); }));
+$$('input[name="tool"]').forEach(el => el.addEventListener("change", () => { state.s1.tool = el.value; resetPush(); refreshS1(); }));
+$$("[data-add]").forEach(b => b.addEventListener("click", () => {
+  if (state.s1.std.length >= 30) return;
+  state.s1.std.push(parseFloat(b.dataset.add)); sim.bal.v += 0.15; refreshS1(); announce("Right pan holds " + state.s1.std.reduce((a, c) => a + c, 0).toFixed(1) + " kilograms.");
+}));
+$("#stdUndo").addEventListener("click", () => { state.s1.std.pop(); refreshS1(); });
+$("#stdClear").addEventListener("click", () => { state.s1.std = []; refreshS1(); });
+$("#pushBtn").addEventListener("click", () => {
+  resetPush();
+  if (reduceMotion) { sim.push.a = PUSH_F / OBJ[state.s1.obj].m; sim.push.x = TRACK_M; sim.push.phase = "done"; }
+  else sim.push.phase = "pushing";
+  refreshS1();
+});
+$("#showForces").addEventListener("change", e => { state.s1.showForces = e.target.checked; });
+$("#showMass").addEventListener("change", e => { state.s1.showMass = e.target.checked; refreshS1(); });
+$("#record1").addEventListener("click", () => {
+  const s = state.s1, rd = s1Reading(); if (!rd.ready) return;
+  s.records.push({ loc: LOC[s.loc].name, obj: OBJ[s.obj].title, tool: TOOL[s.tool], reading: rd.text });
+  if (s.records.length > 40) s.records.shift();
+  renderData(); announce("Recorded " + rd.text + ".");
+});
+
+/* ---------- events: screen 2 ---------- */
+$("#m1").addEventListener("input", e => { state.s2.m1 = +e.target.value; enforceSeparation(); refreshS2(); });
+$("#m2").addEventListener("input", e => { state.s2.m2 = +e.target.value; enforceSeparation(); refreshS2(); });
+$("#dist").addEventListener("input", e => {
+  const s = state.s2, r = +e.target.value; s.x1 = 5 - r / 2; s.x2 = 5 + r / 2; enforceSeparation(); refreshS2();
+});
+$("#showValues").addEventListener("change", e => { state.s2.values = e.target.checked; });
+$("#sciNote").addEventListener("change", e => { state.s2.sci = e.target.checked; refreshS2(); });
+$("#showMath").addEventListener("change", e => { state.s2.math = e.target.checked; refreshS2(); });
+$("#record2").addEventListener("click", () => {
+  const s = state.s2, r = s.x2 - s.x1;
+  s.records.push({ m1: s.m1, m2: s.m2, r: r.toFixed(2).replace(/0$/, ""), F: sci(forceS2()) });
+  if (s.records.length > 40) s.records.shift();
+  renderData(); announce("Recorded force " + sci(forceS2()) + " newtons.");
+});
+
+/* ---------- events: screen 3 ---------- */
+$("#rdist").addEventListener("input", e => { state.s3.r = +e.target.value; refreshS3(); });
+$$("[data-r]").forEach(b => b.addEventListener("click", () => { state.s3.r = parseFloat(b.dataset.r); refreshS3(); announce($("#pullSub").textContent); }));
+$("#record3").addEventListener("click", () => {
+  const s = state.s3; s.points.push({ r: s.r, f: pullAt(s.r) });
+  if (s.points.length > 40) s.points.shift();
+  renderData(); announce("Plotted " + s.r.toFixed(2) + " Earth radii, " + fmtPull(pullAt(s.r)) + " newtons.");
+});
+
+/* ---------- events: shared ---------- */
+$$(".tab").forEach(b => b.addEventListener("click", () => setScreen(+b.dataset.go)));
+$("#resetBtn").addEventListener("click", () => {
+  const d = defaults(), sc = state.screen;
+  if (sc === 1) { const rec = state.s1.records; state.s1 = d.s1; state.s1.records = rec; resetPush(); sim.bal = { a: 0, v: 0 }; syncS1Inputs(); refreshS1(); }
+  else if (sc === 2) { const rec = state.s2.records; state.s2 = d.s2; state.s2.records = rec; refreshS2(); }
+  else { const pts = state.s3.points; state.s3 = d.s3; state.s3.points = pts; refreshS3(); }
+  announce("Screen reset.");
+});
+$("#clearData").addEventListener("click", () => {
+  if (state.screen === 1) state.s1.records = []; else if (state.screen === 2) state.s2.records = []; else state.s3.points = [];
+  renderData();
+});
+$("#challengeList").addEventListener("click", e => { const b = e.target.closest("[data-check]"); if (b) checkAnswer(b.dataset.check); });
+$("#challengeList").addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target.matches('input[type="text"]')) { e.preventDefault(); checkAnswer(e.target.id.slice(3)); }
+});
+
+/* ---------- dragging (screens 2 and 3) ---------- */
+function localPoint(e) { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+function hit(p) {
+  if (state.screen === 2 && s2Geom) {
+    const g = s2Geom;
+    if (Math.hypot(p.x - g.x1, p.y - g.cy) <= Math.max(g.R1, 14) + 10) return "b1";
+    if (Math.hypot(p.x - g.x2, p.y - g.cy) <= Math.max(g.R2, 14) + 10) return "b2";
+  }
+  if (state.screen === 3 && s3Geom && state.s3.r <= 10) {
+    if (Math.abs(p.x - s3Geom.px) <= 26 && Math.abs(p.y - s3Geom.cy) <= 26) return "probe";
+  }
+  return null;
+}
+canvas.addEventListener("pointerdown", e => {
+  const p = localPoint(e), h = hit(p); if (!h) return;
+  sim.drag = h; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = "grabbing"; e.preventDefault();
+});
+canvas.addEventListener("pointermove", e => {
+  const p = localPoint(e);
+  if (!sim.drag) { canvas.style.cursor = hit(p) ? "grab" : "default"; return; }
+  if (sim.drag === "probe") {
+    state.s3.r = clamp(Math.round(((p.x - s3Geom.x0) / s3Geom.Rp) * 100) / 100, 1, 10); refreshS3(); return;
+  }
+  const s = state.s2, g = s2Geom, r1 = radM(s.m1), r2 = radM(s.m2);
+  const xm = Math.round(((p.x - g.X0) / g.ppm) * 10) / 10;
+  if (sim.drag === "b1") s.x1 = clamp(xm, Math.ceil(r1 * 10) / 10, s.x2 - r1 - r2 - 0.05);
+  else s.x2 = clamp(xm, s.x1 + r1 + r2 + 0.05, Math.floor((10 - r2) * 10) / 10);
+  s.x1 = Math.round(s.x1 * 100) / 100; s.x2 = Math.round(s.x2 * 100) / 100;
+  refreshS2();
+});
+const endDrag = () => { sim.drag = null; canvas.style.cursor = "default"; };
+canvas.addEventListener("pointerup", endDrag);
+canvas.addEventListener("pointercancel", endDrag);
+
+/* ---------- boot (keeps a viewer's work across page updates) ---------- */
+function start(data) {
+  try {
+    if (data && data.state && data.state.s1 && data.state.s2 && data.state.s3) {
+      const d = defaults();
+      state = Object.assign(d, data.state);
+      state.s1 = Object.assign(d.s1, data.state.s1); state.s2 = Object.assign(d.s2, data.state.s2); state.s3 = Object.assign(d.s3, data.state.s3);
+    }
+  } catch (err) { state = defaults(); }
+  syncS1Inputs();
+  setScreen(state.screen || 1);
+  requestAnimationFrame(t => { last = t; frame(t); });
+}
+try { window.claude && window.claude.hot && window.claude.hot.snapshot && window.claude.hot.snapshot(() => ({ state: JSON.parse(JSON.stringify(state)) })); } catch (err) { /* optional */ }
+if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(start);
+else start((window.claude && window.claude.hot && window.claude.hot.data) || {});
+})();
+</script>
+
+</body></html>
