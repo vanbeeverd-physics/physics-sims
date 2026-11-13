@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Physics Simulations</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Lexend:wght@400;500&display=swap">
+<style>
+:root{--bg:#eef2f7;--card:#fff;--ink:#152033;--ink2:#4a5669;--edge:#c9d3df;--accent:#2c66d0}
+@media (prefers-color-scheme:dark){:root{--bg:#0d131c;--card:#172131;--ink:#e6edf5;--ink2:#a3b2c3;--edge:#2a3748;--accent:#6ea2ff}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Lexend,"Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:40px 16px 56px}
+h1{font:600 clamp(30px,5vw,44px)/1.1 Fredoka,system-ui,sans-serif;margin:0}
+.sub{color:var(--ink2);margin:8px 0 28px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+a.card{display:flex;flex-direction:column;gap:6px;background:var(--card);border:1px solid var(--edge);border-radius:16px;padding:20px;text-decoration:none;color:inherit;transition:transform .15s,border-color .15s}
+a.card:hover,a.card:focus-visible{transform:translateY(-2px);border-color:var(--accent);outline:none}
+.tag{font-size:13px;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:.06em}
+.card h2{font:600 22px/1.2 Fredoka,system-ui,sans-serif;margin:0}
+.card p{margin:0;color:var(--ink2);font-size:15px}
+footer{margin-top:36px;color:var(--ink2);font-size:14px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Physics Simulations</h1>
+  <p class="sub">9th grade physics · click a sim to open it. No login needed.</p>
+  <div class="grid">
+    <a class="card" href="mass-weight-gravity-lab/">
+      <span class="tag">Gravity</span>
+      <h2>Mass, Weight &amp; Gravity Lab</h2>
+      <p>Weigh objects on different planets, explore the law of gravitation, and see how gravity changes with distance.</p>
+    </a>
+    <a class="card" href="force-pairs-lab/">
+      <span class="tag">Newton's third law</span>
+      <h2>Force Pairs Lab</h2>
+      <p>Skaters, crashes and a rocket launch: every push comes with a push back.</p>
+    </a>
+    <a class="card" href="ramp-work-lab/">
+      <span class="tag">Work &amp; energy</span>
+      <h2>Ramp Work Lab</h2>
+      <p>Push a crate up a ramp and see which forces do work and how net work changes kinetic energy.</p>
+    </a>
+  </div>
+  <footer>Answers you type in a sim are saved only in your own browser.</footer>
+</main>
+</body>
+</html>
