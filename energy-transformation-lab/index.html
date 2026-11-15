@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Energy Transformation Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@500;600&display=swap">
+<style>
+/* Layout: a wide scene card on top, a strip of pickers under it, then the energy-flow diagram beside a try-this list. Three screens switch from the header tabs. */
+:root{
+  --bg:#E8EEF5; --surface:#FFFFFF; --surface-2:#F2F5F9; --ink:#13233A; --ink-2:#4A5B73; --line:#CBD5E2;
+  --accent:#0B6E78; --accent-ink:#FFFFFF; --accent-soft:#D8EDEF;
+  --chem:#2B9A4B; --mech:#2C6BE0; --elec:#8A4FE8; --light:#F6C91E; --therm:#E2472B;
+  --chem-ink:#FFFFFF; --mech-ink:#FFFFFF; --elec-ink:#FFFFFF; --light-ink:#3A2E00; --therm-ink:#FFFFFF;
+  --light-edge:#D09B00;
+  --good:#1D7F45; --good-soft:#DDF2E4; --bad:#B8321F; --bad-soft:#FBE3DE;
+  --sky-1:#C5E0F5; --sky-2:#EAF4FB; --bench:#C49A6C; --bench-edge:#A27B50; --bench-ink:#5A3F22;
+  --metal:#9AA7B8; --metal-dark:#5D6B80; --glass:#E8F3FA; --glass-edge:#8FA9BF; --water:#4FA3E3;
+  --panel:#234A8C; --panel-line:#7FA2DB; --figure:#2A3850; --tire:#2A3140; --ledbody:#F4F6F9; --steam:#FFFFFF;
+  --font-display:"Fredoka","Trebuchet MS","Segoe UI",sans-serif;
+  --font-body:"Atkinson Hyperlegible","Segoe UI",Verdana,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1622; --surface:#172231; --surface-2:#1E2C3F; --ink:#E7EEF7; --ink-2:#A3B2C7; --line:#2E3F57;
+    --accent:#4CC3CF; --accent-ink:#06262A; --accent-soft:#143A40;
+    --chem:#45BF68; --mech:#5A93F5; --elec:#A97BF5; --light:#F8D54A; --therm:#F2664A;
+    --chem-ink:#0B1420; --mech-ink:#0B1420; --elec-ink:#0B1420; --light-ink:#0B1420; --therm-ink:#0B1420;
+    --light-edge:#B88A00;
+    --good:#5FD08A; --good-soft:#143524; --bad:#F58673; --bad-soft:#40201B;
+    --sky-1:#12233A; --sky-2:#1A3049; --bench:#4A3A2A; --bench-edge:#33271B; --bench-ink:#D9C7B0;
+    --metal:#8794A8; --metal-dark:#4E5B70; --glass:#27405A; --glass-edge:#7F9BB5; --water:#3F8FD0;
+    --panel:#1E4A93; --panel-line:#7FA2DB; --figure:#C9D4E3; --tire:#C0CADA; --ledbody:#D5DBE4; --steam:#DCE6F2;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1622; --surface:#172231; --surface-2:#1E2C3F; --ink:#E7EEF7; --ink-2:#A3B2C7; --line:#2E3F57;
+  --accent:#4CC3CF; --accent-ink:#06262A; --accent-soft:#143A40;
+  --chem:#45BF68; --mech:#5A93F5; --elec:#A97BF5; --light:#F8D54A; --therm:#F2664A;
+  --chem-ink:#0B1420; --mech-ink:#0B1420; --elec-ink:#0B1420; --light-ink:#0B1420; --therm-ink:#0B1420;
+  --light-edge:#B88A00;
+  --good:#5FD08A; --good-soft:#143524; --bad:#F58673; --bad-soft:#40201B;
+  --sky-1:#12233A; --sky-2:#1A3049; --bench:#4A3A2A; --bench-edge:#33271B; --bench-ink:#D9C7B0;
+  --metal:#8794A8; --metal-dark:#4E5B70; --glass:#27405A; --glass-edge:#7F9BB5; --water:#3F8FD0;
+  --panel:#1E4A93; --panel-line:#7FA2DB; --figure:#C9D4E3; --tire:#C0CADA; --ledbody:#D5DBE4; --steam:#DCE6F2;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--font-body);padding-block:20px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;line-height:1.15;margin:0;text-wrap:balance}
+h1{font-size:28px} h2{font-size:21px} h3{font-size:17px}
+p{margin:0}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* header + tabs */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px}
+.top p{color:var(--ink-2);font-size:15px}
+.tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px}
+.tab{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;text-decoration:none;color:var(--ink-2);font-weight:700;font-size:15px;white-space:nowrap}
+.tab .n{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--surface-2);font-size:13px;color:var(--ink-2)}
+.tab[aria-current="page"]{background:var(--accent);color:var(--accent-ink)}
+.tab[aria-current="page"] .n{background:var(--accent-ink);color:var(--accent)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.pad{padding:18px}
+.view{display:flex;flex-direction:column;gap:16px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.muted{color:var(--ink-2)}
+.small{font-size:14px}
+
+/* stage */
+.stage-card{overflow:hidden}
+.scroll-x{overflow-x:auto}
+#stage{display:block;width:100%;min-width:660px;height:auto}
+.stage-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;padding:10px 14px;border-top:1px solid var(--line)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;list-style:none;margin:0;padding:0}
+.legend li{display:flex;align-items:center;gap:6px}
+.blk{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:5px;font-weight:700;font-size:12px;line-height:1}
+.blk.chem{background:var(--chem);color:var(--chem-ink)} .blk.mech{background:var(--mech);color:var(--mech-ink)}
+.blk.elec{background:var(--elec);color:var(--elec-ink)} .blk.light{background:var(--light);color:var(--light-ink)}
+.blk.therm{background:var(--therm);color:var(--therm-ink)}
+.stage-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:14px}
+.check{display:flex;align-items:center;gap:6px;cursor:pointer}
+.check input{width:17px;height:17px;accent-color:var(--accent)}
+
+.btn{border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 13px;font-weight:700;font-size:15px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:4px 11px;font-size:14px}
+
+/* pickers */
+.controls{display:grid;grid-template-columns:1.2fr .8fr 1.2fr;gap:12px}
+.picker{display:flex;flex-direction:column;gap:10px;padding:14px;min-width:0}
+.optset{display:flex;flex-wrap:wrap;gap:6px}
+.opt{border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 12px;font-weight:700;font-size:15px;cursor:pointer}
+.opt:hover{border-color:var(--accent)}
+.opt[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.slider{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;font-size:14px}
+.slider label{color:var(--ink-2)}
+.slider output{font-weight:700;font-variant-numeric:tabular-nums}
+.slider input{grid-column:1/-1;width:100%;accent-color:var(--accent)}
+.eff-note{font-size:14px;color:var(--ink-2)}
+
+/* flow + stats */
+.lower{display:grid;grid-template-columns:minmax(0,2.1fr) minmax(0,1fr);gap:12px;align-items:start}
+.flow{display:flex;flex-direction:column;gap:14px;min-width:0}
+#flow-svg{display:block;width:100%;min-width:620px;height:auto}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.stat{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:10px;background:var(--surface-2);min-width:0}
+.stat-k{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.stat-v{font-family:var(--font-display);font-size:26px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat-s{font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.stat.eff{background:var(--accent-soft)}
+.note{padding:10px 12px;border-radius:10px;border:1px dashed var(--line);font-size:15px}
+.try{display:flex;flex-direction:column;gap:10px}
+.try ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:15px}
+
+/* SVG paint classes */
+.sky-a{stop-color:var(--sky-1)} .sky-b{stop-color:var(--sky-2)}
+.f-bench{fill:var(--bench)} .f-bench-edge{fill:var(--bench-edge)}
+.f-metal{fill:var(--metal)} .f-metal-dark{fill:var(--metal-dark)} .f-ink{fill:var(--ink)} .f-surface{fill:var(--surface)}
+.f-glass{fill:var(--glass);fill-opacity:.75} .f-water{fill:var(--water)} .f-light{fill:var(--light)} .f-therm{fill:var(--therm)}
+.f-elec{fill:var(--elec)} .f-accent{fill:var(--accent)} .f-panel{fill:var(--panel)} .f-figure{fill:var(--figure)} .f-ledbody{fill:var(--ledbody)}
+.f-steam{fill:var(--steam)}
+.s-metal{stroke:var(--metal)} .s-metal-dark{stroke:var(--metal-dark)} .s-ink{stroke:var(--ink)} .s-glass{stroke:var(--glass-edge)}
+.s-light{stroke:var(--light-edge)} .s-panel{stroke:var(--panel-line)} .s-figure{stroke:var(--figure)} .s-accent{stroke:var(--accent)} .s-tire{stroke:var(--tire)}
+.nofill{fill:none}
+.zone-cap{font:700 12px var(--font-body);letter-spacing:.14em;fill:var(--bench-ink)}
+.stage-read{font:700 17px var(--font-body);fill:var(--ink);font-variant-numeric:tabular-nums}
+.stage-cap{font:700 12px var(--font-body);fill:var(--ink)}
+.ck rect{stroke:rgba(0,0,0,.28);stroke-width:1}
+.ck text{font:700 10.5px var(--font-body);text-anchor:middle}
+.ck-chem rect{fill:var(--chem)} .ck-chem text{fill:var(--chem-ink)}
+.ck-mech rect{fill:var(--mech)} .ck-mech text{fill:var(--mech-ink)}
+.ck-elec rect{fill:var(--elec)} .ck-elec text{fill:var(--elec-ink)}
+.ck-light rect{fill:var(--light)} .ck-light text{fill:var(--light-ink)}
+.ck-therm rect{fill:var(--therm)} .ck-therm text{fill:var(--therm-ink)}
+.band-chem{fill:var(--chem)} .band-mech{fill:var(--mech)} .band-elec{fill:var(--elec)} .band-light{fill:var(--light)} .band-therm{fill:var(--therm)}
+.fl-val{font:700 14px var(--font-body);fill:var(--ink);font-variant-numeric:tabular-nums}
+.fl-sub{font:13px var(--font-body);fill:var(--ink-2)}
+.fl-stage{font:700 13px var(--font-body);fill:var(--ink)}
+.fl-tick{stroke:var(--line);stroke-width:1.5;stroke-dasharray:4 4}
+
+/* joule screen */
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+.stack{display:flex;flex-direction:column;gap:12px;min-width:0}
+.prose{display:flex;flex-direction:column;gap:10px;max-width:65ch}
+.ladder{width:100%;border-collapse:collapse;font-size:15px}
+.ladder td{padding:7px 0;border-top:1px solid var(--line);vertical-align:top}
+.ladder tr:first-child td{border-top:0}
+.ladder td:first-child{white-space:nowrap;text-align:right;padding-right:14px;font-weight:700;font-variant-numeric:tabular-nums;width:1%}
+.units{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.unit{display:flex;flex-direction:column;gap:4px;padding:12px;border-radius:10px;background:var(--surface-2);min-width:0}
+.unit b{font-family:var(--font-display);font-size:22px;font-weight:600}
+.unit span{font-size:14px;color:var(--ink-2)}
+#scale-svg{display:block;width:100%;max-width:520px;height:auto}
+.sc-lab{font:700 14px var(--font-body);fill:var(--ink)} .sc-sub{font:13px var(--font-body);fill:var(--ink-2)}
+.conv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:14px;font-weight:700}
+.field input{width:100%;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);font-size:17px;font-variant-numeric:tabular-nums}
+.does{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.does b{font-variant-numeric:tabular-nums}
+
+#jd-svg{display:block;width:100%;height:auto;border-radius:10px}
+.jd-meter{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:10px;align-items:stretch}
+.jd-prog{display:flex;flex-direction:column;justify-content:center;gap:6px;font-size:14px;color:var(--ink-2);min-width:0}
+.bar{height:12px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.bar-fill{height:100%;width:0;background:var(--chem)}
+@media (max-width:560px){.jd-meter{grid-template-columns:minmax(0,1fr)}}
+
+/* quiz */
+.quiz{max-width:760px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.dots{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0;padding:0}
+.dots li{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);font-size:13px;font-weight:700;color:var(--ink-2)}
+.dots li.now{border-color:var(--accent);color:var(--accent);border-width:2.5px}
+.dots li.ok{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.dots li.no{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+fieldset.q{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;min-width:0}
+fieldset.q legend{padding:0;margin-bottom:6px}
+.q-text{font-size:19px;line-height:1.4;max-width:60ch}
+.opts{display:flex;flex-direction:column;gap:8px}
+.optrow{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer}
+.optrow:hover{border-color:var(--accent)}
+.optrow input{margin-top:4px;width:17px;height:17px;accent-color:var(--accent);flex:none}
+.optrow.is-right{border-color:var(--good);background:var(--good-soft)}
+.optrow.is-wrong{border-color:var(--bad);background:var(--bad-soft)}
+.optrow .mark{margin-left:auto;font-weight:700;white-space:nowrap}
+.optrow.is-right .mark{color:var(--good)} .optrow.is-wrong .mark{color:var(--bad)}
+.numrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.numrow input{width:150px;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);font-size:18px}
+.fb{padding:12px 14px;border-radius:10px;display:flex;flex-direction:column;gap:4px}
+.fb.ok{background:var(--good-soft);border:1.5px solid var(--good)}
+.fb.no{background:var(--bad-soft);border:1.5px solid var(--bad)}
+.fb b{font-size:16px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.score{font-family:var(--font-display);font-size:54px;font-weight:600;line-height:1}
+.review{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.review li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;padding:10px 0;border-top:1px solid var(--line);font-size:15px}
+.review .ic{font-weight:700} .review .ic.ok{color:var(--good)} .review .ic.no{color:var(--bad)}
+.namefield{display:flex;flex-direction:column;gap:4px;max-width:320px}
+.namefield input{padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface)}
+
+@media (max-width:900px){
+  .controls,.lower,.two{grid-template-columns:minmax(0,1fr)}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:560px){
+  h1{font-size:23px}
+  .tab{padding:6px 10px;font-size:14px}
+  .tab .n{display:none}
+  .units,.conv{grid-template-columns:minmax(0,1fr)}
+  .score{font-size:44px}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Energy Transformation Lab</h1>
+      <p>Follow energy as it changes form, and find out where the "missing" energy goes.</p>
+    </div>
+    <nav class="tabs" aria-label="Screens">
+      <a class="tab" href="#systems" data-go="systems" aria-current="page"><span class="n">1</span>Energy Systems</a>
+      <a class="tab" href="#joule" data-go="joule"><span class="n">2</span>The Joule</a>
+      <a class="tab" href="#quiz" data-go="quiz"><span class="n">3</span>Quiz</a>
+    </nav>
+  </header>
+
+  <!-- ============ SCREEN 1: ENERGY SYSTEMS ============ -->
+  <section class="view" id="view-systems">
+    <div class="card stage-card">
+      <div class="scroll-x">
+        <svg id="stage" viewBox="0 22 960 398" role="img" aria-label="Animated scene: an energy source on the left sends energy blocks through a converter in the middle to a device on the right. Blocks that turn into thermal energy float away.">
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="sky-a"/><stop offset="1" class="sky-b"/></linearGradient>
+            <radialGradient id="glowWarm"><stop offset="0" stop-color="#FFE38A" stop-opacity=".95"/><stop offset=".5" stop-color="#FFB93B" stop-opacity=".45"/><stop offset="1" stop-color="#FFB93B" stop-opacity="0"/></radialGradient>
+            <radialGradient id="glowCool"><stop offset="0" stop-color="#FFFBE0" stop-opacity="1"/><stop offset=".5" stop-color="#FFE873" stop-opacity=".5"/><stop offset="1" stop-color="#FFE873" stop-opacity="0"/></radialGradient>
+          </defs>
+          <rect x="0" y="0" width="960" height="346" fill="url(#sky)"/>
+          <rect x="0" y="346" width="960" height="74" class="f-bench"/>
+          <rect x="0" y="346" width="960" height="6" class="f-bench-edge"/>
+          <text x="160" y="396" text-anchor="middle" class="zone-cap">ENERGY SOURCE</text>
+          <text x="470" y="396" text-anchor="middle" class="zone-cap">CONVERTER</text>
+          <text x="800" y="396" text-anchor="middle" class="zone-cap">DEVICE</text>
+          <path d="M585 334 H778" class="nofill s-ink" stroke-width="4" stroke-linecap="round"/>
+
+          <!-- sources -->
+          <g id="src-cyclist">
+            <g id="belt" class="s-ink" stroke-width="3" opacity=".7"><line x1="252" y1="285" x2="440" y2="228"/><line x1="252" y1="299" x2="440" y2="242"/></g>
+            <path d="M232 346 L252 292 L272 346" class="nofill s-metal-dark" stroke-width="6" stroke-linejoin="round"/>
+            <circle cx="92" cy="292" r="50" class="nofill s-tire" stroke-width="6"/>
+            <circle cx="252" cy="292" r="50" class="nofill s-tire" stroke-width="6"/>
+            <g id="rear-spokes" class="s-metal" stroke-width="2"></g>
+            <g class="s-metal" stroke-width="2"><line x1="92" y1="244" x2="92" y2="340"/><line x1="44" y1="292" x2="140" y2="292"/><line x1="58" y1="258" x2="126" y2="326"/><line x1="58" y1="326" x2="126" y2="258"/></g>
+            <g id="leg-far" class="s-figure nofill" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" opacity=".5"><polyline id="leg-b"/></g>
+            <line id="crank-b" class="s-metal-dark" stroke-width="5" stroke-linecap="round"/>
+            <path d="M252 292 L172 292 L200 226 L114 226 L92 292 M172 292 L114 226 M252 292 L200 226 M114 226 L106 204 L90 204" class="nofill s-accent" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+            <rect x="184" y="214" width="36" height="9" rx="4.5" class="f-ink"/>
+            <circle cx="172" cy="292" r="11" class="f-metal-dark"/>
+            <line id="crank-a" class="s-metal-dark" stroke-width="5" stroke-linecap="round"/>
+            <line x1="202" y1="207" x2="150" y2="162" class="s-figure" stroke-width="22" stroke-linecap="round"/>
+            <path d="M152 166 L130 196 L98 204" class="nofill s-figure" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="136" cy="138" r="15" class="f-figure"/>
+            <path d="M120 137 A16 16 0 0 1 152 137 Z" class="f-therm"/>
+            <g class="s-figure nofill" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"><polyline id="leg-a"/></g>
+          </g>
+
+          <g id="src-sun" hidden>
+            <polygon id="sun-beam" class="f-light" opacity=".15"/>
+            <g id="sun-rays" class="s-light" stroke-width="6" stroke-linecap="round"></g>
+            <circle cx="120" cy="105" r="42" class="f-light s-light" stroke-width="3"/>
+          </g>
+
+          <g id="src-water" hidden>
+            <path d="M54 170 L46 346 M146 170 L154 346 M50 262 L150 262" class="nofill s-metal-dark" stroke-width="6" stroke-linecap="round"/>
+            <rect x="40" y="50" width="120" height="120" rx="8" class="f-glass s-glass" stroke-width="4"/>
+            <rect x="46" y="76" width="108" height="88" rx="4" class="f-water"/>
+            <path d="M160 126 H392 V142" class="nofill s-metal" stroke-width="14" stroke-linejoin="round"/>
+            <rect x="230" y="106" width="10" height="14" class="f-metal-dark"/>
+            <rect x="216" y="100" width="38" height="8" rx="4" class="f-therm"/>
+            <rect id="stream" x="388" y="142" width="8" height="196" class="f-water" opacity=".9"/>
+            <rect x="362" y="338" width="158" height="8" rx="3" class="f-metal-dark"/>
+          </g>
+
+          <g id="src-kettle" hidden>
+            <rect x="92" y="326" width="156" height="20" rx="5" class="f-metal-dark"/>
+            <path d="M118 326 V298 M222 326 V298" class="nofill s-metal-dark" stroke-width="6" stroke-linecap="round"/>
+            <g id="flame">
+              <path d="M170 326 C146 314 154 298 170 280 C186 298 194 314 170 326 Z" class="f-therm"/>
+              <path d="M170 326 C158 319 162 310 170 300 C178 310 182 319 170 326 Z" class="f-light"/>
+            </g>
+            <path d="M218 262 L284 168 L298 178 L234 284 Z" class="f-metal"/>
+            <path d="M118 250 C74 240 74 292 116 284" class="nofill s-ink" stroke-width="8" stroke-linecap="round"/>
+            <path d="M112 296 Q102 230 170 226 Q238 230 228 296 Q170 306 112 296 Z" class="f-metal"/>
+            <ellipse cx="170" cy="228" rx="36" ry="8" class="f-metal-dark"/>
+            <circle cx="170" cy="216" r="7" class="f-ink"/>
+            <g id="steam"></g>
+          </g>
+
+          <!-- converters -->
+          <g id="conv-wheel">
+            <path d="M440 235 L404 346 M440 235 L476 346" class="nofill s-metal-dark" stroke-width="8" stroke-linecap="round"/>
+            <g class="s-ink" stroke-width="3" opacity=".7"><line x1="440" y1="226" x2="550" y2="289"/><line x1="440" y1="244" x2="550" y2="311"/></g>
+            <g id="wheel-rot"></g>
+            <circle cx="440" cy="235" r="9" class="f-ink"/>
+            <rect x="515" y="272" width="70" height="74" rx="10" class="f-metal"/>
+            <circle cx="550" cy="300" r="12" class="f-metal-dark"/>
+            <circle cx="550" cy="300" r="4" class="f-ink"/>
+            <path d="M556 317 l-11 13 h8 l-4 11 l12 -15 h-8 l4 -9 z" class="f-elec"/>
+            <circle cx="585" cy="334" r="5" class="f-ink"/>
+          </g>
+          <g id="conv-panel" hidden>
+            <path d="M506 214 V346 M476 346 H536" class="nofill s-metal-dark" stroke-width="8" stroke-linecap="round"/>
+            <path d="M436 334 H549" class="nofill s-ink" stroke-width="4"/>
+            <polygon points="356,334 466,196 546,196 436,334" class="f-panel s-metal" stroke-width="4" stroke-linejoin="round"/>
+            <path d="M486 196 L376 334 M506 196 L396 334 M526 196 L416 334 M429.3 242 H509.3 M392.7 288 H472.7" class="nofill s-panel" stroke-width="1.5"/>
+            <rect x="549" y="316" width="36" height="30" rx="5" class="f-metal"/>
+            <circle cx="585" cy="334" r="5" class="f-ink"/>
+          </g>
+
+          <!-- devices -->
+          <g id="dev-inc" hidden>
+            <circle id="glow-inc" cx="800" cy="238" r="105" fill="url(#glowWarm)" opacity="0"/>
+            <g id="rays-inc" class="s-light" stroke-width="4" stroke-linecap="round" opacity="0"></g>
+            <rect x="772" y="322" width="56" height="24" rx="5" class="f-metal-dark"/>
+            <rect x="786" y="286" width="28" height="38" rx="4" class="f-metal"/>
+            <path d="M786 298 H814 M786 308 H814" class="nofill s-metal-dark" stroke-width="2"/>
+            <path d="M786 290 C786 274 760 266 760 238 A40 40 0 1 1 840 238 C840 266 814 274 814 290 Z" class="f-glass s-glass" stroke-width="3"/>
+            <path id="fil-inc" d="M793 288 L790 250 L795 238 L800 250 L805 238 L810 250 L807 288" class="nofill s-ink" stroke-width="2.5" stroke-linejoin="round"/>
+          </g>
+          <g id="dev-led">
+            <circle id="glow-led" cx="800" cy="238" r="110" fill="url(#glowCool)" opacity="0"/>
+            <g id="rays-led" class="s-light" stroke-width="4" stroke-linecap="round" opacity="0"></g>
+            <rect x="772" y="322" width="56" height="24" rx="5" class="f-metal-dark"/>
+            <rect x="786" y="286" width="28" height="38" rx="4" class="f-metal"/>
+            <path d="M786 298 H814 M786 308 H814" class="nofill s-metal-dark" stroke-width="2"/>
+            <path d="M786 290 L768 252 H832 L814 290 Z" class="f-ledbody s-glass" stroke-width="2"/>
+            <path d="M768 252 A32 40 0 0 1 832 252 Z" class="f-glass s-glass" stroke-width="3"/>
+            <rect x="782" y="244" width="8" height="5" class="f-light"/><rect x="796" y="244" width="8" height="5" class="f-light"/><rect x="810" y="244" width="8" height="5" class="f-light"/>
+          </g>
+          <g id="dev-fan" hidden>
+            <ellipse cx="800" cy="342" rx="46" ry="8" class="f-metal-dark"/>
+            <rect x="795" y="232" width="10" height="110" class="f-metal"/>
+            <g id="fan-rot">
+              <path d="M800 222 C786 198 794 172 816 164 C828 184 820 208 800 222 Z" class="f-accent"/>
+              <path d="M800 222 C786 198 794 172 816 164 C828 184 820 208 800 222 Z" class="f-accent" transform="rotate(120 800 222)"/>
+              <path d="M800 222 C786 198 794 172 816 164 C828 184 820 208 800 222 Z" class="f-accent" transform="rotate(240 800 222)"/>
+            </g>
+            <circle cx="800" cy="222" r="66" class="nofill s-metal" stroke-width="4"/>
+            <circle cx="800" cy="222" r="11" class="f-ink"/>
+          </g>
+          <g id="dev-heater" hidden>
+            <rect x="738" y="330" width="124" height="16" rx="5" class="f-metal-dark"/>
+            <rect id="coil" x="752" y="326" width="96" height="6" rx="3" class="f-metal"/>
+            <path d="M756 250 H844 V314 Q844 324 834 324 H766 Q756 324 756 314 Z" class="f-water" opacity=".8"/>
+            <path d="M752 212 V314 Q752 328 766 328 H834 Q848 328 848 314 V212" class="nofill s-glass" stroke-width="4" stroke-linecap="round"/>
+            <rect x="827" y="196" width="10" height="120" rx="5" class="f-surface s-ink" stroke-width="1.5"/>
+            <rect id="thermo-col" x="830" y="286" width="4" height="24" class="f-therm"/>
+            <circle cx="832" cy="313" r="6.5" class="f-therm"/>
+            <text id="temp-read" x="784" y="180" text-anchor="middle" class="stage-read">20.0 °C</text>
+            <text x="784" y="200" text-anchor="middle" class="stage-cap">250 g of water</text>
+          </g>
+
+          <g id="chunks"></g>
+        </svg>
+      </div>
+      <div class="stage-foot">
+        <ul class="legend" aria-label="Energy forms">
+          <li><span class="blk chem">C</span>Chemical</li>
+          <li><span class="blk mech">M</span>Mechanical</li>
+          <li><span class="blk elec">E</span>Electrical</li>
+          <li><span class="blk light">L</span>Light</li>
+          <li><span class="blk therm">T</span>Thermal</li>
+        </ul>
+        <div class="stage-tools">
+          <label class="check"><input type="checkbox" id="show-blocks" checked>Energy blocks</label>
+          <button class="btn sm" id="btn-pause" type="button">Pause</button>
+          <button class="btn sm" id="btn-reset" type="button">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="card picker">
+        <span class="eyebrow" id="lab-src">Energy source</span>
+        <div class="optset" role="group" aria-labelledby="lab-src" data-kind="src">
+          <button class="opt" type="button" data-v="cyclist">Cyclist</button>
+          <button class="opt" type="button" data-v="sun">Sun</button>
+          <button class="opt" type="button" data-v="water">Falling water</button>
+          <button class="opt" type="button" data-v="kettle">Kettle</button>
+        </div>
+        <div class="slider">
+          <label for="src-power" id="src-power-label">Pedaling effort</label>
+          <output id="src-power-out" for="src-power">400 J/s</output>
+          <input type="range" id="src-power" min="0" max="800" step="40" value="400">
+        </div>
+        <p class="eff-note" id="src-note"></p>
+      </div>
+      <div class="card picker">
+        <span class="eyebrow" id="lab-conv">Converter</span>
+        <div class="optset" role="group" aria-labelledby="lab-conv" data-kind="conv">
+          <button class="opt" type="button" data-v="wheel">Generator wheel</button>
+          <button class="opt" type="button" data-v="panel">Solar panel</button>
+        </div>
+        <p class="eff-note" id="conv-note"></p>
+      </div>
+      <div class="card picker">
+        <span class="eyebrow" id="lab-dev">Device</span>
+        <div class="optset" role="group" aria-labelledby="lab-dev" data-kind="dev">
+          <button class="opt" type="button" data-v="inc">Incandescent bulb</button>
+          <button class="opt" type="button" data-v="led">LED bulb</button>
+          <button class="opt" type="button" data-v="fan">Fan</button>
+          <button class="opt" type="button" data-v="heater">Water heater</button>
+        </div>
+        <p class="eff-note" id="dev-note"></p>
+      </div>
+    </div>
+
+    <div class="lower">
+      <div class="card pad flow">
+        <div>
+          <h2>Where the energy goes every second</h2>
+          <p class="muted small">The band starts as all of the energy going in. At each step, the part that turns into thermal energy peels away. J/s means joules every second.</p>
+        </div>
+        <div class="scroll-x"><svg id="flow-svg" viewBox="0 0 760 290" role="img" aria-label="Energy flow diagram"></svg></div>
+        <div class="stats">
+          <div class="stat"><span class="stat-k">Energy in</span><span class="stat-v" id="st-in">400 J</span><span class="stat-s" id="st-in-s">chemical</span></div>
+          <div class="stat"><span class="stat-k">Useful out</span><span class="stat-v" id="st-out">32 J</span><span class="stat-s" id="st-out-s">light</span></div>
+          <div class="stat"><span class="stat-k">Thermal waste</span><span class="stat-v" id="st-waste">368 J</span><span class="stat-s" id="st-sum">32 + 368 = 400</span></div>
+          <div class="stat eff"><span class="stat-k">Efficiency</span><span class="stat-v" id="st-eff">8%</span><span class="stat-s" id="st-eq">32 ÷ 400 × 100</span></div>
+        </div>
+        <p class="note" id="flow-note" role="status" aria-live="polite"></p>
+      </div>
+      <div class="card pad try">
+        <h2>Things to try</h2>
+        <ul>
+          <li>Light a bulb using only the Sun. Name each form the energy takes along the way.</li>
+          <li>Keep the same source and swap the incandescent bulb for the LED. Which numbers change? Which stay the same?</li>
+          <li>Find the system with the highest efficiency. Can you reach 100%?</li>
+          <li>Point the Sun at the generator wheel. Where does the energy go?</li>
+          <li>For any system, add "useful out" and "thermal waste". Compare the total with "energy in".</li>
+        </ul>
+        <p class="muted small">Efficiency = useful energy out ÷ total energy in × 100. The percentages in this lab are typical, rounded values for real equipment.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 2: THE JOULE ============ -->
+  <section class="view" id="view-joule" hidden>
+    <div class="two">
+      <div class="stack">
+        <div class="card pad stack">
+          <h2>How big is a joule?</h2>
+          <div class="prose">
+            <p>The <b>joule (J)</b> is the unit for energy. Every form of energy can be measured in joules, which is what lets us compare the chemical energy in a banana with the light from a bulb.</p>
+            <p>One joule is small. It is about the energy it takes to lift a small apple one meter.</p>
+          </div>
+          <table class="ladder">
+            <tr><td>1 J</td><td>Lifting a small apple (about 100 g) up one meter</td></tr>
+            <tr><td>4.18 J</td><td>Warming 1 gram of water by 1 °C</td></tr>
+            <tr><td>10 J</td><td>An LED bulb shining for one second</td></tr>
+            <tr><td>4,184 J</td><td>Warming 1 kilogram of water by 1 °C</td></tr>
+            <tr><td>about 50,000 J</td><td>A fully charged phone battery</td></tr>
+            <tr><td>about 440,000 J</td><td>The chemical energy in one banana</td></tr>
+            <tr><td>about 8,400,000 J</td><td>The food a teenager eats in a day</td></tr>
+            <tr><td>about 120,000,000 J</td><td>One gallon of gasoline</td></tr>
+          </table>
+          <p class="muted small prose">The unit is named for James Prescott Joule. In the 1840s he let a falling weight spin a paddle wheel inside a tank of water, then measured the water warming up. His experiment showed that motion and heat are both forms of energy.</p>
+        </div>
+        <div class="card pad stack" id="jdemo">
+          <div>
+            <h2>Count the joules</h2>
+            <p class="muted small">Try three of the examples from the list above and watch the meter.</p>
+          </div>
+          <div class="optset" id="jd-tabs" role="group" aria-label="Choose a demonstration">
+            <button class="opt" type="button" data-d="lift" aria-pressed="true">Lift an apple</button>
+            <button class="opt" type="button" data-d="water" aria-pressed="false">Warm water</button>
+            <button class="opt" type="button" data-d="led" aria-pressed="false">Light an LED</button>
+          </div>
+          <svg id="jd-svg" viewBox="0 0 520 240" role="img" aria-label="Demonstration scene. The readouts below describe what is happening.">
+            <defs>
+              <linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="sky-a"/><stop offset="1" class="sky-b"/></linearGradient>
+              <radialGradient id="glowJ"><stop offset="0" stop-color="#FFFBE0" stop-opacity="1"/><stop offset=".5" stop-color="#FFE873" stop-opacity=".5"/><stop offset="1" stop-color="#FFE873" stop-opacity="0"/></radialGradient>
+            </defs>
+            <rect x="0" y="0" width="520" height="200" fill="url(#sky2)"/>
+            <rect x="0" y="200" width="520" height="40" class="f-bench"/>
+            <rect x="0" y="200" width="520" height="5" class="f-bench-edge"/>
+
+            <g id="jd-g-lift">
+              <rect x="286" y="50" width="22" height="150" class="f-light s-light" stroke-width="2"/>
+              <g id="jd-ticks" stroke-width="1.5" style="stroke:var(--light-ink)"></g>
+              <text x="316" y="197" class="stage-cap">0 m</text>
+              <text x="316" y="129" class="stage-cap">0.5 m</text>
+              <text x="316" y="56" class="stage-cap">1 m</text>
+              <text x="150" y="172" text-anchor="middle" class="stage-cap">small apple,</text>
+              <text x="150" y="188" text-anchor="middle" class="stage-cap">about 100 g</text>
+              <rect id="jd-pole" x="226" y="200" width="8" height="0" class="f-metal-dark"/>
+              <g id="jd-apple">
+                <rect x="204" y="194" width="52" height="6" rx="3" class="f-metal-dark"/>
+                <circle cx="230" cy="178" r="16" class="f-therm"/>
+                <path d="M230 163 q2 -8 7 -10" class="nofill s-ink" stroke-width="2.5" stroke-linecap="round"/>
+                <ellipse cx="240" cy="157" rx="7" ry="3.5" class="band-chem" transform="rotate(-25 240 157)"/>
+              </g>
+              <text id="jd-lifts" x="430" y="112" text-anchor="middle" class="stage-read">0 lifts</text>
+              <text x="430" y="132" text-anchor="middle" class="stage-cap">about 1 J each</text>
+            </g>
+
+            <g id="jd-g-water" hidden>
+              <g id="jd-w-1">
+                <rect x="222" y="189" width="26" height="9" class="f-water"/>
+                <path d="M220 120 V190 Q220 200 230 200 H240 Q250 200 250 190 V120" class="nofill s-glass" stroke-width="3" stroke-linecap="round"/>
+                <text x="235" y="108" text-anchor="middle" class="stage-cap">1 g of water</text>
+              </g>
+              <g id="jd-w-1000" hidden>
+                <path d="M176 92 H304 V186 Q304 196 294 196 H186 Q176 196 176 186 Z" class="f-water" opacity=".8"/>
+                <path d="M172 62 V186 Q172 200 186 200 H294 Q308 200 308 186 V62" class="nofill s-glass" stroke-width="4" stroke-linecap="round"/>
+                <text x="240" y="50" text-anchor="middle" class="stage-cap">1 kg of water (1 liter)</text>
+              </g>
+              <rect x="354" y="36" width="12" height="150" rx="6" class="f-surface s-ink" stroke-width="1.5"/>
+              <rect id="jd-col" x="357.5" y="155" width="5" height="28" class="f-therm"/>
+              <circle cx="360" cy="188" r="9" class="f-therm"/>
+              <path d="M368 183 h6 M368 113 h6 M368 43 h6" class="nofill s-ink" stroke-width="1.5"/>
+              <text x="378" y="187" class="sc-sub">0</text>
+              <text x="378" y="117" class="sc-sub">50</text>
+              <text x="378" y="47" class="sc-sub">100 °C</text>
+              <text id="jd-temp" x="456" y="112" text-anchor="middle" class="stage-read">20.00 °C</text>
+              <text x="456" y="132" text-anchor="middle" class="stage-cap">started at 20 °C</text>
+            </g>
+
+            <g id="jd-g-led" hidden>
+              <circle id="jd-glow" cx="240" cy="96" r="100" fill="url(#glowJ)" opacity="0"/>
+              <g id="jd-rays" class="s-light" stroke-width="4" stroke-linecap="round" opacity="0"></g>
+              <rect x="212" y="180" width="56" height="20" rx="5" class="f-metal-dark"/>
+              <rect x="226" y="144" width="28" height="38" rx="4" class="f-metal"/>
+              <path d="M226 156 H254 M226 166 H254" class="nofill s-metal-dark" stroke-width="2"/>
+              <path d="M226 148 L208 110 H272 L254 148 Z" class="f-ledbody s-glass" stroke-width="2"/>
+              <path d="M208 110 A32 40 0 0 1 272 110 Z" class="f-glass s-glass" stroke-width="3"/>
+              <rect x="222" y="102" width="8" height="5" class="f-light"/><rect x="236" y="102" width="8" height="5" class="f-light"/><rect x="250" y="102" width="8" height="5" class="f-light"/>
+              <text id="jd-time" x="430" y="112" text-anchor="middle" class="stage-read">0.0 s on</text>
+              <text x="430" y="132" text-anchor="middle" class="stage-cap">10 J every second</text>
+            </g>
+          </svg>
+
+          <div class="row" id="jd-act-lift">
+            <button class="btn primary" type="button" id="jd-lift">Lift the apple 1 meter</button>
+          </div>
+          <div class="stack" id="jd-act-water" hidden>
+            <div class="optset" id="jd-mass" role="group" aria-label="Amount of water">
+              <button class="opt" type="button" data-m="1" aria-pressed="true">1 gram of water</button>
+              <button class="opt" type="button" data-m="1000" aria-pressed="false">1 kilogram of water</button>
+            </div>
+            <div class="row" id="jd-adds">
+              <button class="btn primary" type="button" data-add="1" data-lab="1 J">Add 1 J</button>
+              <button class="btn primary" type="button" data-add="4.184" data-lab="1 cal">Add 1 cal</button>
+              <button class="btn primary" type="button" data-add="4184" data-lab="1 Cal">Add 1 Cal</button>
+            </div>
+          </div>
+          <div class="row" id="jd-act-led" hidden>
+            <button class="btn primary" type="button" id="jd-led">Turn on</button>
+          </div>
+
+          <div class="jd-meter">
+            <div class="stat"><span class="stat-k">Energy so far</span><span class="stat-v" id="jd-j">0 J</span><span class="stat-s" id="jd-alt">= 0 cal = 0 Cal</span></div>
+            <div class="jd-prog">
+              <div class="bar"><div class="bar-fill" id="jd-bar"></div></div>
+              <span id="jd-bar-lab">0% of 1 food Calorie (4,184 J)</span>
+            </div>
+          </div>
+          <p class="note" id="jd-note" role="status" aria-live="polite">Lifting a small apple one meter takes about 1 J.</p>
+          <div class="row"><button class="btn sm" type="button" id="jd-reset">Reset this demonstration</button></div>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="card pad stack">
+          <h2>Joules, calories and Calories</h2>
+          <div class="prose">
+            <p>Food labels use a different energy unit. Watch the capital letter: a food <b>Calorie</b> is 1,000 times bigger than a <b>calorie</b>.</p>
+          </div>
+          <div class="units">
+            <div class="unit"><b>1 J</b><span>joule. The standard unit of energy in science.</span></div>
+            <div class="unit"><b>1 cal</b><span>calorie = 4.184 J. Warms 1 g of water by 1 °C.</span></div>
+            <div class="unit"><b>1 Cal</b><span>food Calorie = 1,000 cal = 4,184 J. Warms 1 kg of water by 1 °C.</span></div>
+          </div>
+          <svg id="scale-svg" viewBox="0 0 520 216" role="img" aria-label="Three squares drawn to scale by area. The food Calorie square is huge, the calorie square is a small dot, and the joule square is a tiny speck.">
+            <rect x="12" y="12" width="180" height="180" rx="4" class="band-chem" opacity=".85"/>
+            <text x="102" y="98" text-anchor="middle" class="sc-lab" style="fill:var(--chem-ink)">1 Calorie</text>
+            <text x="102" y="116" text-anchor="middle" class="sc-sub" style="fill:var(--chem-ink)">4,184 J</text>
+            <circle cx="262.5" cy="62.5" r="13" class="nofill s-ink" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <rect x="260" y="60" width="5.06" height="5.06" class="band-chem"/>
+            <text x="286" y="60" class="sc-lab">1 calorie</text>
+            <text x="286" y="78" class="sc-sub">4.184 J</text>
+            <circle cx="262.5" cy="142.5" r="13" class="nofill s-ink" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <rect x="261.3" y="141.3" width="2.47" height="2.47" class="band-chem"/>
+            <text x="286" y="140" class="sc-lab">1 joule</text>
+            <text x="286" y="158" class="sc-sub">the speck inside the circle</text>
+            <text x="12" y="210" class="sc-sub">Areas are drawn to scale.</text>
+          </svg>
+        </div>
+
+        <div class="card pad stack">
+          <h2>Food label translator</h2>
+          <p class="muted small">Pick a food or type in any box. The other two update.</p>
+          <div class="optset" id="foods" role="group" aria-label="Foods">
+            <button class="opt" type="button" data-cal="95">Apple</button>
+            <button class="opt" type="button" data-cal="105" aria-pressed="true">Banana</button>
+            <button class="opt" type="button" data-cal="140">Can of soda</button>
+            <button class="opt" type="button" data-cal="285">Slice of pizza</button>
+            <button class="opt" type="button" data-cal="380">PB&amp;J sandwich</button>
+          </div>
+          <div class="conv">
+            <div class="field"><label for="in-Cal">Calories (Cal)</label><input id="in-Cal" type="number" min="0" step="any" value="105" inputmode="decimal"></div>
+            <div class="field"><label for="in-cal">calories (cal)</label><input id="in-cal" type="number" min="0" step="any" value="105000" inputmode="decimal"></div>
+            <div class="field"><label for="in-j">joules (J)</label><input id="in-j" type="number" min="0" step="any" value="439320" inputmode="decimal"></div>
+          </div>
+          <div>
+            <h3>What that much energy could do</h3>
+            <ul class="does" id="does"></ul>
+          </div>
+          <p class="muted small">These assume every joule goes exactly where you want it. In real life some always ends up as thermal energy. Food values are typical amounts.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 3: QUIZ ============ -->
+  <section class="view" id="view-quiz" hidden>
+    <div class="quiz">
+      <div class="card pad stack" id="quiz-body">
+        <h2>Check what you learned</h2>
+        <div class="prose">
+          <p>10 questions on energy forms, joules and Calories, and efficiency. Your first answer to each question is the one that counts, and you get an explanation after every question.</p>
+          <p>Some questions use new numbers each time, so you can retake the quiz for more practice.</p>
+        </div>
+        <div class="namefield">
+          <label for="quiz-name" class="small"><b>Your name</b> (optional, shown on your score screen)</label>
+          <input id="quiz-name" type="text" autocomplete="off" maxlength="60">
+        </div>
+        <div class="row"><button class="btn primary" id="quiz-start" type="button">Start quiz</button></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+var NS='http://www.w3.org/2000/svg';
+function S(tag,attrs,parent){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+function fmt(n){
+  if(!isFinite(n)||n===0)return '0';
+  var a=Math.abs(n),d=a>=100?0:a>=10?1:2;
+  if(a<1)return String(Number(n.toPrecision(2)));
+  return Number(n.toFixed(d)).toLocaleString('en-US',{maximumFractionDigits:d});
+}
+function big(n){return Math.round(n).toLocaleString('en-US');}
+
+/* ---------------- data ---------------- */
+var FORM={chem:{n:'chemical',l:'C'},mech:{n:'mechanical',l:'M'},elec:{n:'electrical',l:'E'},light:{n:'light',l:'L'},therm:{n:'thermal',l:'T'}};
+var SOURCES={
+  cyclist:{name:'cyclist',slider:'Pedaling effort',max:800,step:40,def:400,spin:-1,
+    note:'Food stores chemical energy. Muscles turn about 25% of it into motion. The rest warms the body.',
+    pre:{form:'chem',pts:[[158,176],[202,208]],eff:.25,stage:"Cyclist's body"},
+    out:{form:'mech',wheel:[[202,208],[172,292],[252,292],[440,235]],panel:[[202,208],[172,292],[252,292]]}},
+  sun:{name:'Sun',slider:'Sunlight',max:1000,step:50,def:600,spin:0,
+    note:'Sunlight arrives as light energy. The number is the light landing on the converter.',
+    pre:null,
+    out:{form:'light',wheel:[[150,122],[440,235]],panel:[[150,122],[451,265]]}},
+  water:{name:'falling water',slider:'Water flow',max:500,step:25,def:300,spin:-1,
+    note:'Water falling from the tank carries mechanical energy.',
+    pre:null,
+    out:{form:'mech',wheel:[[392,144],[392,212],[440,235]],panel:[[392,144],[392,286]]}},
+  kettle:{name:'kettle',slider:'Burner heat',max:2000,step:100,def:1200,spin:1,
+    note:'The burner supplies thermal energy. Only about 10% ends up as the motion of the steam jet.',
+    pre:{form:'therm',pts:[[170,318],[170,262]],eff:.10,stage:'Kettle'},
+    out:{form:'mech',wheel:[[170,262],[291,173],[402,180],[440,235]],panel:[[170,262],[291,173],[440,250]]}}
+};
+var CONVERTERS={
+  wheel:{name:'Generator wheel',accepts:'mech',eff:.80,inExt:[[550,300]],elec:[[585,334]],
+    note:'Mechanical → electrical, about 80% efficient. Friction and warm wires take the rest.'},
+  panel:{name:'Solar panel',accepts:'light',eff:.20,elec:[[451,265],[436,334],[549,334],[585,334]],
+    note:'Light → electrical, about 20% efficient. Most of the light just warms the panel.'}
+};
+var DEVICES={
+  inc:{name:'Incandescent bulb',eff:.05,out:'light',outName:'light',wire:[[778,334],[800,334],[800,290],[800,240]],at:[800,238],emit:'radiate',
+    note:'Electrical → light, about 5% efficient. The glowing wire is mostly a heater.'},
+  led:{name:'LED bulb',eff:.40,out:'light',outName:'light',wire:[[778,334],[800,334],[800,290],[800,240]],at:[800,238],emit:'radiate',
+    note:'Electrical → light, about 40% efficient.'},
+  fan:{name:'Fan',eff:.70,out:'mech',outName:'mechanical (moving air)',wire:[[795,334],[800,334],[800,222]],at:[800,222],emit:'blow',
+    note:'Electrical → mechanical, about 70% efficient. The motor gets warm.'},
+  heater:{name:'Water heater',eff:.90,out:'therm',outName:'thermal (in the water)',wire:[[740,338],[800,338],[800,330]],at:[800,330],emit:'soak',
+    note:'Electrical → thermal, about 90% reaches the water. The rest warms the room.'}
+};
+var DEFAULT={src:'cyclist',conv:'wheel',dev:'led'};
+var cfg={src:DEFAULT.src,conv:DEFAULT.conv,dev:DEFAULT.dev};
+var power={};for(var k in SOURCES)power[k]=SOURCES[k].def;
+var segs=[],compat=true,chunks=[],parts=[],spawnAcc=0,q=0.31;
+var paused=false,active=true,looping=false,lastTs=0,clock=0;
+var crank=0.6,wheelA=0,fanA=0,temp=20;
+var layer=$('#chunks');
+
+/* ---------------- static art built in script ---------------- */
+(function art(){
+  var w=$('#wheel-rot'),i,a;
+  S('circle',{cx:440,cy:235,r:56,'class':'nofill s-metal','stroke-width':6},w);
+  for(i=0;i<8;i++){
+    S('line',{x1:440,y1:235,x2:440,y2:179,'class':'s-metal','stroke-width':3,transform:'rotate('+i*45+' 440 235)'},w);
+    S('rect',{x:434,y:160,width:12,height:26,rx:2,'class':'f-metal-dark',transform:'rotate('+(i*45+22.5)+' 440 235)'},w);
+  }
+  var rs=$('#rear-spokes');
+  for(i=0;i<4;i++)S('line',{x1:252,y1:244,x2:252,y2:340,transform:'rotate('+i*45+' 252 292)'},rs);
+  var sr=$('#sun-rays');
+  for(i=0;i<12;i++){a=i*Math.PI/6;S('line',{x1:120+54*Math.cos(a),y1:105+54*Math.sin(a),x2:120+70*Math.cos(a),y2:105+70*Math.sin(a)},sr);}
+  ['inc','led'].forEach(function(id){
+    var g=$('#rays-'+id);
+    for(i=0;i<9;i++){a=(-200+i*27.5)*Math.PI/180;S('line',{x1:800+60*Math.cos(a),y1:238+60*Math.sin(a),x2:800+82*Math.cos(a),y2:238+82*Math.sin(a)},g);}
+  });
+  var st=$('#steam');
+  for(i=0;i<6;i++)S('circle',{r:6,'class':'f-steam'},st);
+})();
+
+/* ---------------- model ---------------- */
+function mkSeg(form,pts,eff,name,outForm){
+  var cum=[0],i;
+  for(i=1;i<pts.length;i++)cum.push(cum[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
+  return {form:form,pts:pts,eff:eff,name:name,outForm:outForm,cum:cum,len:cum[cum.length-1],acc:.5};
+}
+function build(){
+  var s=SOURCES[cfg.src],c=CONVERTERS[cfg.conv],d=DEVICES[cfg.dev];
+  compat=c.accepts===s.out.form;
+  segs=[];
+  if(s.pre)segs.push(mkSeg(s.pre.form,s.pre.pts,s.pre.eff,s.pre.stage,s.out.form));
+  segs.push(mkSeg(s.out.form,compat&&c.inExt?s.out[cfg.conv].concat(c.inExt):s.out[cfg.conv],compat?c.eff:0,c.name,'elec'));
+  if(compat)segs.push(mkSeg('elec',c.elec.concat(d.wire),d.eff,d.name,d.out));
+}
+function powers(){var p=[power[cfg.src]];segs.forEach(function(s){p.push(p[p.length-1]*s.eff);});return p;}
+function posOn(seg,d){
+  var c=seg.cum,i=1;while(i<c.length-1&&c[i]<d)i++;
+  var t=(d-c[i-1])/((c[i]-c[i-1])||1),a=seg.pts[i-1],b=seg.pts[i];
+  return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
+}
+function rnd(){q=(q+0.61803398875)%1;return q;}
+function mkEl(form){
+  var g=S('g',{'class':'ck ck-'+form},layer);
+  S('rect',{x:-8,y:-8,width:16,height:16,rx:4},g);
+  S('text',{y:3.8},g).textContent=FORM[form].l;
+  return g;
+}
+function setForm(el,form){el.setAttribute('class','ck ck-'+form);el.lastChild.textContent=FORM[form].l;}
+function waste(x,y,el){
+  setForm(el,'therm');
+  var p={el:el,x:x,y:y,vx:(rnd()-.5)*40,vy:-40,life:2.2,max:2.2};
+  if(cfg.dev==='heater'&&compat&&x>700){p.vx=(rnd()<.5?-1:1)*68;p.vy=-20;}
+  parts.push(p);
+}
+function emit(el){
+  var d=DEVICES[cfg.dev],x=d.at[0],y=d.at[1],p;
+  setForm(el,d.out);
+  if(d.emit==='radiate'){var a=(-205+rnd()*230)*Math.PI/180;p={el:el,x:x,y:y,vx:74*Math.cos(a),vy:74*Math.sin(a),life:1.5,max:1.5};}
+  else if(d.emit==='blow'){p={el:el,x:x,y:y,vx:84,vy:(rnd()-.5)*46,life:1.6,max:1.6};}
+  else{p={el:el,x:x+(rnd()-.5)*64,y:y-6,vx:0,vy:-30,life:1.7,max:1.7};}
+  parts.push(p);
+}
+function clearBlocks(){
+  while(layer.firstChild)layer.removeChild(layer.firstChild);
+  chunks=[];parts=[];spawnAcc=0;
+}
+function step(dt){
+  var P=power[cfg.src],s=SOURCES[cfg.src],i,c,seg,pt;
+  clock+=dt;
+  spawnAcc+=dt*(P/s.max)*4.5;
+  while(spawnAcc>=1){spawnAcc-=1;chunks.push({seg:0,d:0,el:mkEl(segs[0].form)});}
+  for(i=chunks.length-1;i>=0;i--){
+    c=chunks[i];seg=segs[c.seg];c.d+=dt*120;
+    if(c.d>=seg.len){
+      pt=seg.pts[seg.pts.length-1];
+      seg.acc+=seg.eff;
+      if(seg.acc>=1-1e-9){
+        seg.acc-=1;
+        if(c.seg<segs.length-1){c.seg++;c.d=0;setForm(c.el,segs[c.seg].form);}
+        else{chunks.splice(i,1);emit(c.el);}
+      }else{chunks.splice(i,1);waste(pt[0],pt[1],c.el);}
+    }
+  }
+  for(i=parts.length-1;i>=0;i--){
+    c=parts[i];c.x+=c.vx*dt;c.y+=c.vy*dt;c.life-=dt;
+    if(c.life<=0){layer.removeChild(c.el);parts.splice(i,1);}
+  }
+  /* moving parts */
+  var p=powers(),lvl=P/s.max,ci=s.pre?1:0,inConv=p[ci]/(s.max*(s.pre?s.pre.eff:1)),useful=compat?p[p.length-1]:0;
+  if(cfg.src==='cyclist')crank-=dt*lvl*7;
+  if(cfg.conv==='wheel'&&s.out.form==='mech')wheelA+=dt*s.spin*inConv*260;
+  if(cfg.dev==='fan'&&useful>0)fanA+=dt*(160+Math.min(1,useful/200)*900);
+  if(cfg.dev==='heater'&&useful>0)temp=Math.min(100,temp+dt*useful/(250*4.184));
+}
+function draw(){
+  var i,c,pt,s=SOURCES[cfg.src],P=power[cfg.src],lvl=P/s.max,p=powers(),useful=compat?p[p.length-1]:0;
+  for(i=0;i<chunks.length;i++){c=chunks[i];pt=posOn(segs[c.seg],c.d);c.el.setAttribute('transform','translate('+pt[0].toFixed(1)+' '+pt[1].toFixed(1)+')');}
+  for(i=0;i<parts.length;i++){c=parts[i];c.el.setAttribute('transform','translate('+c.x.toFixed(1)+' '+c.y.toFixed(1)+')');c.el.setAttribute('opacity',Math.min(1,c.life/(c.max*.5)).toFixed(2));}
+  $('#wheel-rot').setAttribute('transform','rotate('+(wheelA%360).toFixed(1)+' 440 235)');
+  if(cfg.src==='cyclist'){
+    legs();
+    $('#rear-spokes').setAttribute('transform','rotate('+((crank*100)%360).toFixed(1)+' 252 292)');
+  }else if(cfg.src==='sun'){
+    $('#sun-rays').setAttribute('opacity',(.2+.8*lvl).toFixed(2));
+    $('#sun-rays').setAttribute('transform','rotate('+((clock*8)%360).toFixed(1)+' 120 105)');
+    $('#sun-beam').setAttribute('opacity',(.2*lvl).toFixed(2));
+  }else if(cfg.src==='water'){
+    var w=lvl>0?2+10*lvl:0,st=$('#stream');
+    st.setAttribute('width',w.toFixed(1));st.setAttribute('x',(392-w/2).toFixed(1));
+  }else if(cfg.src==='kettle'){
+    var fl=$('#flame');fl.toggleAttribute('hidden',lvl===0);
+    var sc=.4+.75*lvl;fl.setAttribute('transform','translate(170 326) scale('+sc.toFixed(2)+') translate(-170 -326)');
+    var tgt=cfg.conv==='wheel'?[400,180]:[438,248],pf=$('#steam').childNodes;
+    for(i=0;i<pf.length;i++){
+      var ph=(clock*.7+i/pf.length)%1;
+      pf[i].setAttribute('cx',(291+(tgt[0]-291)*ph).toFixed(1));pf[i].setAttribute('cy',(173+(tgt[1]-173)*ph).toFixed(1));
+      pf[i].setAttribute('r',(5+ph*11).toFixed(1));pf[i].setAttribute('opacity',((1-ph)*.75*lvl).toFixed(2));
+    }
+  }
+  if(cfg.dev==='inc'||cfg.dev==='led'){
+    var g=useful>0?Math.min(1,Math.sqrt(useful/70)):0;
+    $('#glow-'+cfg.dev).setAttribute('opacity',g.toFixed(2));
+    $('#rays-'+cfg.dev).setAttribute('opacity',g.toFixed(2));
+    if(cfg.dev==='inc')$('#fil-inc').style.stroke=useful>0?'var(--therm)':'';
+  }else if(cfg.dev==='fan'){
+    $('#fan-rot').setAttribute('transform','rotate('+(fanA%360).toFixed(1)+' 800 222)');
+  }else{
+    $('#temp-read').textContent=temp>=100?'100.0 °C, boiling':temp.toFixed(1)+' °C';
+    var h=Math.max(4,temp);$('#thermo-col').setAttribute('y',(310-h).toFixed(1));$('#thermo-col').setAttribute('height',h.toFixed(1));
+    $('#coil').style.fill=useful>0?'var(--therm)':'';
+  }
+}
+function legs(){
+  var bb=[172,292],hip=[202,208],L=56,R=17;
+  [['a',0],['b',Math.PI]].forEach(function(o){
+    var a=crank+o[1],fx=bb[0]+R*Math.cos(a),fy=bb[1]+R*Math.sin(a);
+    var dx=fx-hip[0],dy=fy-hip[1],d=Math.hypot(dx,dy),h=Math.sqrt(Math.max(0,L*L-d*d/4));
+    var px=-dy/d,py=dx/d;if(px>0){px=-px;py=-py;}
+    var kx=hip[0]+dx/2+px*h,ky=hip[1]+dy/2+py*h;
+    $('#leg-'+o[0]).setAttribute('points',hip[0]+','+hip[1]+' '+kx.toFixed(1)+','+ky.toFixed(1)+' '+fx.toFixed(1)+','+fy.toFixed(1));
+    var cr=$('#crank-'+o[0]);cr.setAttribute('x1',bb[0]);cr.setAttribute('y1',bb[1]);cr.setAttribute('x2',fx.toFixed(1));cr.setAttribute('y2',fy.toFixed(1));
+  });
+}
+function frame(ts){
+  if(paused||!active){looping=false;return;}
+  var dt=Math.min(.05,(ts-lastTs)/1000||0);lastTs=ts;
+  step(dt);draw();requestAnimationFrame(frame);
+}
+function kick(){if(!looping&&!paused&&active){looping=true;lastTs=performance.now();requestAnimationFrame(frame);}}
+function prewarm(){for(var i=0;i<270;i++)step(1/30);draw();}
+
+/* ---------------- UI wiring for the scene ---------------- */
+function show(id,on){$('#'+id).toggleAttribute('hidden',!on);}
+function applyConfig(resetBlocks){
+  var s=SOURCES[cfg.src],k;
+  for(k in SOURCES)show('src-'+k,k===cfg.src);
+  for(k in CONVERTERS)show('conv-'+k,k===cfg.conv);
+  for(k in DEVICES)show('dev-'+k,k===cfg.dev);
+  show('belt',cfg.conv==='wheel');
+  $('#stream').setAttribute('height',cfg.conv==='wheel'?196:146);
+  var t=cfg.conv==='wheel'?[[400,200],[470,262]]:[[392,292],[520,214]];
+  $('#sun-beam').setAttribute('points','104,144 144,70 '+t[1][0]+','+t[1][1]+' '+t[0][0]+','+t[0][1]);
+  $$('.optset[data-kind] .opt').forEach(function(b){b.setAttribute('aria-pressed',String(cfg[b.parentNode.dataset.kind]===b.dataset.v));});
+  var r=$('#src-power');r.max=s.max;r.step=s.step;r.value=power[cfg.src];
+  $('#src-power-label').textContent=s.slider;
+  $('#src-note').textContent=s.note;
+  $('#conv-note').textContent=CONVERTERS[cfg.conv].note;
+  $('#dev-note').textContent=DEVICES[cfg.dev].note;
+  build();
+  if(resetBlocks){clearBlocks();temp=20;prewarm();}
+  readouts();
+}
+function readouts(){
+  var s=SOURCES[cfg.src],d=DEVICES[cfg.dev],c=CONVERTERS[cfg.conv],p=powers(),P=p[0],useful=compat?p[p.length-1]:0,w=P-useful;
+  var inForm=FORM[segs[0].form].n;
+  $('#src-power-out').textContent=fmt(P)+' J/s';
+  $('#st-in').textContent=fmt(P)+' J';$('#st-in-s').textContent=inForm;
+  $('#st-out').textContent=fmt(useful)+' J';$('#st-out-s').textContent=compat?d.outName:'nothing reaches the device';
+  $('#st-waste').textContent=fmt(w)+' J';$('#st-sum').textContent=fmt(useful)+' + '+fmt(w)+' = '+fmt(P);
+  $('#st-eff').textContent=P>0?fmt(useful/P*100)+'%':'–';
+  $('#st-eq').textContent=P>0?fmt(useful)+' ÷ '+fmt(P)+' × 100':'no energy going in';
+  var n;
+  if(P===0)n='Slide the source control up to send energy into the system.';
+  else if(!compat&&cfg.conv==='wheel')n='Sunlight cannot turn the wheel. It only warms it, so all of the light energy ends up as thermal energy. Try the solar panel.';
+  else if(!compat)n='A solar panel only transforms light. The mechanical energy from the '+s.name+' ends up as thermal energy. Try the generator wheel.';
+  else if(cfg.dev==='heater')n='The goal here is warm water, so thermal energy in the water counts as useful. Of every '+fmt(P)+' J going in, '+fmt(useful)+' J reaches the water and '+fmt(w)+' J spreads into the room. It takes 4.18 J to warm 1 g of water by 1 °C.';
+  else n='Of every '+fmt(P)+' J going in, '+fmt(useful)+' J comes out as '+d.outName+'. The other '+fmt(w)+' J is not gone. It spread into the surroundings as thermal energy.';
+  $('#flow-note').textContent=n;
+  renderFlow(p);
+}
+function renderFlow(p){
+  var svg=$('#flow-svg');while(svg.firstChild)svg.removeChild(svg.firstChild);
+  var P=p[0],n=segs.length,x0=12,xE=748,base=206,H=120,r=12,i;
+  if(P===0){S('text',{x:380,y:140,'text-anchor':'middle','class':'fl-sub'},svg).textContent='No energy is going in.';return;}
+  var xs=[x0];for(i=1;i<=n;i++)xs.push(x0+(xE-x0)*i/(n+1));xs.push(xE);
+  var forms=[segs[0].form];segs.forEach(function(s){forms.push(s.outForm);});
+  var d=DEVICES[cfg.dev];
+  for(i=0;i<=n;i++){
+    var h=p[i]/P*H,hd=p[i]>0?Math.max(1.5,h):0,mid=(xs[i]+xs[i+1])/2;
+    if(hd>0)S('rect',{x:xs[i],y:base-hd,width:xs[i+1]-xs[i],height:hd,'class':'band-'+forms[i],opacity:.92},svg);
+    var last=i===n,name=FORM[forms[i]].n;
+    if(last&&compat)name=d.outName;
+    S('text',{x:mid,y:base+20,'text-anchor':'middle','class':'fl-val'},svg).textContent=fmt(p[i])+' J/s';
+    S('text',{x:mid,y:base+37,'text-anchor':'middle','class':'fl-sub'},svg).textContent=name+(last&&compat?', useful':'');
+    if(i<n){
+      var xk=xs[i+1],hn=p[i+1]/P*H,w=Math.max(1.5,h-hn),t=base-h,R=r+w,top=64,ah=Math.max(10,Math.min(20,w*.3));
+      S('line',{x1:xk,y1:base+4,x2:xk,y2:base+46,'class':'fl-tick'},svg);
+      S('path',{d:'M'+xk+' '+(t+w)+' A'+R+' '+R+' 0 0 0 '+(xk+R)+' '+(t-r)+' L'+(xk+R)+' '+top+' L'+(xk+r)+' '+top+' L'+(xk+r)+' '+(t-r)+' A'+r+' '+r+' 0 0 1 '+xk+' '+t+' Z','class':'band-therm',opacity:.6},svg);
+      var cx=xk+r+w/2;
+      S('path',{d:'M'+(cx-w/2-5)+' '+top+' L'+cx+' '+(top-ah)+' L'+(cx+w/2+5)+' '+top+' Z','class':'band-therm',opacity:.6},svg);
+      S('text',{x:cx,y:18,'text-anchor':'middle','class':'fl-val'},svg).textContent=fmt(p[i]-p[i+1])+' J/s';
+      S('text',{x:cx,y:35,'text-anchor':'middle','class':'fl-sub'},svg).textContent='thermal';
+      S('text',{x:xk,y:base+62,'text-anchor':'middle','class':'fl-stage'},svg).textContent=segs[i].name;
+      S('text',{x:xk,y:base+78,'text-anchor':'middle','class':'fl-sub'},svg).textContent=fmt(segs[i].eff*100)+'% efficient';
+    }
+  }
+}
+$$('.optset[data-kind] .opt').forEach(function(b){
+  b.addEventListener('click',function(){
+    var kind=b.parentNode.dataset.kind;if(cfg[kind]===b.dataset.v)return;
+    cfg[kind]=b.dataset.v;applyConfig(true);kick();
+  });
+});
+$('#src-power').addEventListener('input',function(e){power[cfg.src]=Number(e.target.value);readouts();if(paused)draw();});
+$('#show-blocks').addEventListener('change',function(e){layer.toggleAttribute('hidden',!e.target.checked);});
+$('#btn-pause').addEventListener('click',function(){paused=!paused;this.textContent=paused?'Play':'Pause';kick();});
+$('#btn-reset').addEventListener('click',function(){
+  cfg={src:DEFAULT.src,conv:DEFAULT.conv,dev:DEFAULT.dev};for(var k in SOURCES)power[k]=SOURCES[k].def;
+  applyConfig(true);kick();
+});
+
+/* ---------------- screens ---------------- */
+var VIEWS=['systems','joule','quiz'];
+function go(v){
+  if(VIEWS.indexOf(v)<0)v='systems';
+  VIEWS.forEach(function(n){$('#view-'+n).hidden=n!==v;});
+  $$('.tab').forEach(function(t){if(t.dataset.go===v)t.setAttribute('aria-current','page');else t.removeAttribute('aria-current');});
+  active=v==='systems';kick();
+  if(v!=='joule'&&jd&&jd.on){ledSet(false);jdNote(JD_INTRO.led);}
+}
+document.addEventListener('click',function(e){
+  var a=e.target.closest('[data-go]');if(!a)return;
+  e.preventDefault();go(a.dataset.go);
+  try{location.hash=a.dataset.go;}catch(err){}
+  window.scrollTo(0,0);
+});
+window.addEventListener('hashchange',function(){go(location.hash.slice(1));});
+
+/* ---------------- joule screen ---------------- */
+var inJ=$('#in-j'),incal=$('#in-cal'),inCal=$('#in-Cal');
+function sig(x){return Number(x.toPrecision(5));}
+function dur(sec){
+  if(sec<60)return fmt(sec)+' seconds';
+  if(sec<3600)return fmt(sec/60)+' minutes';
+  if(sec<172800)return fmt(sec/3600)+' hours';
+  return fmt(sec/86400)+' days';
+}
+function vol(l){return l>=1?fmt(l)+' liters':fmt(l*1000)+' milliliters';}
+function setEnergy(J,from){
+  if(!isFinite(J)||J<0)J=0;
+  if(from!=='j')inJ.value=sig(J);
+  if(from!=='cal')incal.value=sig(J/4.184);
+  if(from!=='Cal')inCal.value=sig(J/4184);
+  var ul=$('#does');ul.innerHTML='';
+  [['Lift a small apple one meter ',big(J)+(Math.round(J)===1?' time':' times')],
+   ['Keep an LED bulb (10 J every second) lit for ',dur(J/10)],
+   ['Heat ',vol(J/(4184*80)),' of water from room temperature (20 °C) to boiling'],
+   ['Fuel the cyclist in the lab (400 J every second) for ',dur(J/400)]
+  ].forEach(function(r){
+    var li=document.createElement('li');li.appendChild(document.createTextNode(r[0]));
+    var b=document.createElement('b');b.textContent=r[1];li.appendChild(b);
+    if(r[2])li.appendChild(document.createTextNode(r[2]));
+    ul.appendChild(li);
+  });
+}
+function unpress(){$$('#foods .opt').forEach(function(b){b.setAttribute('aria-pressed','false');});}
+inJ.addEventListener('input',function(){unpress();setEnergy(parseFloat(inJ.value),'j');});
+incal.addEventListener('input',function(){unpress();setEnergy(parseFloat(incal.value)*4.184,'cal');});
+inCal.addEventListener('input',function(){unpress();setEnergy(parseFloat(inCal.value)*4184,'Cal');});
+$$('#foods .opt').forEach(function(b){
+  if(!b.hasAttribute('aria-pressed'))b.setAttribute('aria-pressed','false');
+  b.addEventListener('click',function(){unpress();b.setAttribute('aria-pressed','true');setEnergy(Number(b.dataset.cal)*4184,'');});
+});
+
+/* ---------------- joule demonstrations ---------------- */
+var reduced=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+var jd={mode:'lift',n:0,m:1,E:0,t:0,on:false,timer:null,last:0,liftStart:0,raf:0};
+var JD_INTRO={lift:'Lifting a small apple one meter takes about 1 J.',
+  water:'Add energy and watch the temperature. Try it with both amounts of water.',
+  led:'An LED bulb uses about 10 J of electrical energy every second it is on.'};
+(function(){
+  var i,a,tk=$('#jd-ticks'),ry=$('#jd-rays');
+  for(i=0;i<=10;i++)S('line',{x1:286,y1:200-15*i,x2:i%5===0?300:294,y2:200-15*i},tk);
+  for(i=0;i<9;i++){a=(-200+i*27.5)*Math.PI/180;S('line',{x1:240+58*Math.cos(a),y1:96+58*Math.sin(a),x2:240+80*Math.cos(a),y2:96+80*Math.sin(a)},ry);}
+})();
+function fmtU(x){if(!x)return '0';if(x>=100)return big(x);return String(Number(x.toPrecision(x>=1?4:3)));}
+function jdJ(){return jd.mode==='lift'?jd.n:jd.mode==='water'?jd.E:Math.round(jd.t*10);}
+function jdT(){return Math.min(100,20+jd.E/(jd.m*4.184));}
+function jdNote(s){$('#jd-note').textContent=s;}
+function jdMeter(){
+  var J=jdJ(),c=J/4184;
+  $('#jd-j').textContent=(J>=100?big(J):String(Number(J.toFixed(3))))+' J';
+  $('#jd-alt').textContent='= '+fmtU(J/4.184)+' cal = '+fmtU(c)+' Cal';
+  $('#jd-bar').style.width=Math.min(100,c*100)+'%';
+  $('#jd-bar-lab').textContent=c<1?fmtU(c*100)+'% of 1 food Calorie (4,184 J)':fmtU(c)+(fmtU(c)==='1'?' food Calorie':' food Calories');
+}
+function setLift(h){
+  $('#jd-apple').setAttribute('transform','translate(0 '+(-150*h).toFixed(1)+')');
+  var p=$('#jd-pole');p.setAttribute('y',(200-150*h).toFixed(1));p.setAttribute('height',(150*h).toFixed(1));
+}
+function liftFrame(now){
+  var t=now-jd.liftStart,h=t<600?1-Math.pow(1-t/600,3):t<1000?1:t<1250?1-(t-1000)/250:0;
+  setLift(h);jd.raf=t<1250?requestAnimationFrame(liftFrame):0;
+}
+function jdDraw(){
+  $('#jd-lifts').textContent=jd.n+(jd.n===1?' lift':' lifts');
+  var T=jdT();
+  $('#jd-temp').textContent=T>=100?'100 °C, boiling':T.toFixed(jd.m===1?2:3)+' °C';
+  $('#jd-col').setAttribute('y',(183-T*1.4).toFixed(1));$('#jd-col').setAttribute('height',(T*1.4).toFixed(1));
+  $('#jd-time').textContent=jd.t.toFixed(1)+' s on';
+  $('#jd-glow').setAttribute('opacity',jd.on?1:0);$('#jd-rays').setAttribute('opacity',jd.on?1:0);
+  jdMeter();
+}
+function ledSet(on){
+  jd.on=on;clearInterval(jd.timer);jd.timer=null;
+  if(on){
+    jd.last=performance.now();
+    jd.timer=setInterval(function(){var now=performance.now();jd.t+=(now-jd.last)/1000;jd.last=now;jdDraw();},100);
+  }
+  $('#jd-led').textContent=on?'Turn off':'Turn on';
+  jdDraw();
+}
+function jdMode(m){
+  if(jd.on)ledSet(false);
+  jd.mode=m;
+  ['lift','water','led'].forEach(function(k){
+    $('#jd-g-'+k).toggleAttribute('hidden',k!==m);$('#jd-act-'+k).hidden=k!==m;
+  });
+  $$('#jd-tabs .opt').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.d===m));});
+  jdNote(JD_INTRO[m]);jdDraw();
+}
+$$('#jd-tabs .opt').forEach(function(b){b.addEventListener('click',function(){jdMode(b.dataset.d);});});
+$('#jd-lift').addEventListener('click',function(){
+  jd.n++;
+  if(reduced)setLift(1);
+  else{jd.liftStart=performance.now();if(!jd.raf)jd.raf=requestAnimationFrame(liftFrame);}
+  jdNote(big(jd.n)+(jd.n===1?' lift':' lifts')+' of 1 meter = about '+big(jd.n)+' J. It would take 4,184 lifts to add up to 1 food Calorie.');
+  jdDraw();
+});
+$$('#jd-mass .opt').forEach(function(b){
+  b.addEventListener('click',function(){
+    jd.m=Number(b.dataset.m);jd.E=0;
+    $$('#jd-mass .opt').forEach(function(o){o.setAttribute('aria-pressed',String(o===b));});
+    $('#jd-w-1').toggleAttribute('hidden',jd.m!==1);$('#jd-w-1000').toggleAttribute('hidden',jd.m!==1000);
+    jdNote('Starting again at 20 °C with '+(jd.m===1?'1 g':'1 kg')+' of water.');jdDraw();
+  });
+});
+$$('#jd-adds .btn').forEach(function(b){
+  b.addEventListener('click',function(){
+    var a=Number(b.dataset.add),lab=b.dataset.lab,ml=jd.m===1?'1 g':'1 kg',dT=a/(jd.m*4.184),n;
+    jd.E+=a;
+    if(jdT()>=100)n='The water is boiling. Extra energy now turns water into steam instead of raising its temperature.';
+    else if(a===4.184&&jd.m===1)n='1 cal warmed 1 g of water by 1 °C. That is how the calorie is defined.';
+    else if(a===4184&&jd.m===1000)n='1 Cal warmed 1 kg of water by 1 °C. A food Calorie is 1,000 calories.';
+    else if(dT<0.0005)n=lab+' is too little to move this thermometer when there is 1 kg of water. It warms it by only '+fmtU(dT)+' °C.';
+    else n=lab+' warmed '+ml+' of water by '+fmtU(dT)+' °C.';
+    jdNote(n);jdDraw();
+  });
+});
+$('#jd-led').addEventListener('click',function(){
+  ledSet(!jd.on);
+  jdNote(jd.on?'The LED is using 10 J of electrical energy every second.':jd.t.toFixed(1)+' s × 10 J every second = '+big(jdJ())+' J.');
+});
+$('#jd-reset').addEventListener('click',function(){
+  if(jd.mode==='lift'){jd.n=0;setLift(0);}
+  else if(jd.mode==='water')jd.E=0;
+  else{ledSet(false);jd.t=0;}
+  jdNote(JD_INTRO[jd.mode]);jdDraw();
+});
+jdDraw();
+
+/* ---------------- quiz ---------------- */
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function makeQuestions(){
+  var N=pick([100,150,200,250]);
+  var mX=pick([200,400,500,800]),mE=pick([25,40,60,75]),mY=mX*mE/100;
+  var bX=pick([10,20,30,50]),bY=bX*.4;
+  var gE=pick([25,50]),gX=pick([100,200,500]),gA=gX*.8*gE/100;
+  function mc(q,opts,why,tag){return {type:'mc',tag:tag,q:q,opts:shuffle(opts.map(function(t,i){return {t:t,ok:i===0};})),why:why};}
+  function num(q,ans,unit,why,tag){return {type:'num',tag:tag,q:q,ans:ans,unit:unit,why:why};}
+  return [
+    mc('A solar panel sits in the sunlight and runs a fan. What energy transformation happens inside the solar panel?',
+      ['Light → electrical','Electrical → light','Chemical → electrical','Thermal → mechanical'],
+      'A solar panel takes in light energy and puts out electrical energy. The fan then transforms that electrical energy into mechanical energy.','Solar panel transformation'),
+    mc('A cyclist pedals a generator that lights a bulb. Which list shows the energy forms in the correct order?',
+      ['Chemical → mechanical → electrical → light','Mechanical → chemical → electrical → light','Chemical → electrical → mechanical → light','Light → electrical → mechanical → chemical'],
+      'Food stores chemical energy. Muscles turn it into mechanical energy, the generator turns that into electrical energy, and the bulb turns that into light. Thermal energy is released at every step.','Order of energy forms'),
+    mc('Which of these takes about 1 joule of energy?',
+      ['Lifting a small apple one meter','Heating a cup of water to boiling','Running an LED bulb for an hour','Riding a bike for one minute'],
+      'One joule is small: about the energy needed to lift a 100 g apple one meter. The other choices take thousands of joules.','Size of a joule'),
+    mc('A granola bar label says '+N+' Calories. Since 1 Calorie = 4,184 J, about how much energy is that in joules?',
+      [big(N*4184)+' J',big(N*4.184)+' J',big(N/4.184)+' J',big(N*1000)+' J'],
+      N+' Cal × 4,184 J per Cal = '+big(N*4184)+' J. Food Calories are large units, so the number of joules is big.','Calories to joules'),
+    mc('How does a food Calorie (capital C) compare with a calorie (lowercase c)?',
+      ['A Calorie is 1,000 times larger','They are the same amount','A Calorie is 1,000 times smaller','A Calorie is about 4 times larger'],
+      '1 Calorie = 1,000 calories. That is why a food Calorie is also called a kilocalorie.','Calorie vs. calorie'),
+    num('An electric motor takes in '+mX+' J of electrical energy and puts out '+mY+' J of mechanical energy. What is its efficiency, as a percent?',mE,'%',
+      'Efficiency = useful out ÷ total in × 100 = '+mY+' ÷ '+mX+' × 100 = '+mE+'%.','Calculating efficiency'),
+    num('Each second, an LED bulb takes in '+bX+' J of electrical energy and gives off '+bY+' J of light. How many joules become thermal energy each second?',bX-bY,'J',
+      'Energy is not destroyed, so the energy out must add up to the energy in: '+bX+' J − '+bY+' J = '+(bX-bY)+' J of thermal energy.','Finding the thermal energy'),
+    mc('Bulb A takes in 60 J and gives off 3 J of light. Bulb B takes in 10 J and gives off 4 J of light. Which statement is true?',
+      ['Bulb B is more efficient: 40% compared with 5%','Bulb A is more efficient because it takes in more energy','They are equally efficient because both make light','Bulb A is more efficient: 20% compared with 2.5%'],
+      'Bulb A: 3 ÷ 60 × 100 = 5%. Bulb B: 4 ÷ 10 × 100 = 40%. Efficiency depends on the fraction that becomes useful, not on how much goes in.','Comparing two bulbs'),
+    mc('Why is no real machine 100% efficient?',
+      ['Some energy always transforms into thermal energy that spreads into the surroundings','Friction destroys some of the energy','Machines use up energy until none is left','Machines create extra energy that has to be thrown away'],
+      'Energy is never created or destroyed. In every transformation some of it becomes thermal energy that spreads out, so less than 100% ends up in the useful form.','Why efficiency is under 100%'),
+    num('A generator is 80% efficient. It sends its electrical energy to a bulb that is '+gE+'% efficient. If '+gX+' J of mechanical energy goes into the generator, how many joules of light come out of the bulb?',gA,'J',
+      'Generator: '+gX+' J × 0.80 = '+(gX*.8)+' J of electrical energy. Bulb: '+(gX*.8)+' J × '+(gE/100)+' = '+gA+' J of light.','Two steps in a row')
+  ];
+}
+var quiz={qs:[],i:0,res:[],name:''},qb=$('#quiz-body');
+function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
+function dots(){
+  var ul=el('ol','dots');ul.setAttribute('aria-label','Progress');
+  quiz.qs.forEach(function(_,i){
+    var r=quiz.res[i],li=el('li',r?(r.ok?'ok':'no'):(i===quiz.i?'now':''),r?(r.ok?'✓':'✗'):String(i+1));
+    ul.appendChild(li);
+  });
+  return ul;
+}
+function renderQ(){
+  var Q=quiz.qs[quiz.i];qb.innerHTML='';
+  qb.appendChild(dots());
+  var fs=el('fieldset','q'),lg=el('legend','eyebrow','Question '+(quiz.i+1)+' of '+quiz.qs.length);
+  fs.appendChild(lg);fs.appendChild(el('p','q-text',Q.q));
+  var check=el('button','btn primary','Check answer');check.type='button';check.id='quiz-check';check.disabled=true;
+  if(Q.type==='mc'){
+    var box=el('div','opts');
+    Q.opts.forEach(function(o,i){
+      var lab=el('label','optrow'),inp=document.createElement('input');
+      inp.type='radio';inp.name='quiz-opt';inp.id='quiz-opt-'+i;inp.value=i;
+      inp.addEventListener('change',function(){check.disabled=false;});
+      lab.appendChild(inp);lab.appendChild(el('span','',o.t));box.appendChild(lab);
+    });
+    fs.appendChild(box);
+  }else{
+    var row=el('div','numrow'),lab2=el('label','small','Your answer:');lab2.htmlFor='quiz-num';
+    var ni=document.createElement('input');ni.id='quiz-num';ni.type='text';ni.inputMode='decimal';ni.autocomplete='off';
+    ni.addEventListener('input',function(){check.disabled=!isFinite(parseFloat(ni.value.replace(/,/g,'')));});
+    ni.addEventListener('keydown',function(e){if(e.key==='Enter'&&!check.disabled&&!check.hidden)check.click();});
+    row.appendChild(lab2);row.appendChild(ni);row.appendChild(el('b','',Q.unit));fs.appendChild(row);
+  }
+  qb.appendChild(fs);
+  var act=el('div','row');act.appendChild(check);qb.appendChild(act);
+  var fb=el('div');fb.setAttribute('role','status');fb.setAttribute('aria-live','polite');qb.appendChild(fb);
+  check.addEventListener('click',function(){
+    var ok,given,right;
+    if(Q.type==='mc'){
+      var sel=qb.querySelector('input[name="quiz-opt"]:checked');if(!sel)return;
+      var idx=Number(sel.value);ok=Q.opts[idx].ok;given=Q.opts[idx].t;
+      $$('#quiz-body .optrow').forEach(function(rw,i){
+        rw.querySelector('input').disabled=true;
+        if(Q.opts[i].ok){rw.classList.add('is-right');rw.appendChild(el('span','mark','✓ Correct answer'));right=Q.opts[i].t;}
+        else if(i===idx){rw.classList.add('is-wrong');rw.appendChild(el('span','mark','✗ Your answer'));}
+      });
+    }else{
+      var ni2=$('#quiz-num'),v=parseFloat(ni2.value.replace(/,/g,''));
+      ok=Math.abs(v-Q.ans)<=0.5;given=ni2.value.trim()+' '+Q.unit;right=Q.ans+' '+Q.unit;ni2.disabled=true;
+    }
+    quiz.res[quiz.i]={ok:ok,given:given,right:right};
+    var f=el('div','fb '+(ok?'ok':'no'));
+    f.appendChild(el('b','',ok?'✓ Correct':'✗ Not quite. The answer is '+right+'.'));
+    f.appendChild(el('span','',Q.why));fb.appendChild(f);
+    qb.replaceChild(dots(),qb.firstChild);
+    check.hidden=true;
+    var last=quiz.i===quiz.qs.length-1,nx=el('button','btn primary',last?'See my score':'Next question');nx.type='button';nx.id='quiz-next';
+    nx.addEventListener('click',function(){if(last)renderScore();else{quiz.i++;renderQ();}});
+    act.appendChild(nx);nx.focus();
+  });
+}
+function renderScore(){
+  var n=quiz.qs.length,s=quiz.res.filter(function(r){return r.ok;}).length;qb.innerHTML='';
+  qb.appendChild(el('span','eyebrow','Quiz complete'));
+  var top=el('div','row');top.appendChild(el('span','score',s+' / '+n));
+  var who=el('div','stack');
+  if(quiz.name)who.appendChild(el('b','',quiz.name));
+  who.appendChild(el('span','muted small',new Date().toLocaleString([], {dateStyle:'medium',timeStyle:'short'})));
+  top.appendChild(who);qb.appendChild(top);
+  var msg=s>=9?'You are ready for the next unit. You can track energy through a system and explain where the rest of it goes.'
+    :s>=7?'Solid work. Look over the questions you missed below, then try again for a perfect score.'
+    :'Go back to the Energy Systems screen and work through "Things to try", then retake the quiz. The numbers will be different.';
+  qb.appendChild(el('p','prose',msg));
+  var ul=el('ol','review');
+  quiz.qs.forEach(function(Q,i){
+    var r=quiz.res[i],li=el('li'),d=el('div');
+    li.appendChild(el('span','ic '+(r.ok?'ok':'no'),r.ok?'✓':'✗'));
+    d.appendChild(el('b','',(i+1)+'. '+Q.tag));
+    d.appendChild(el('div','muted',r.ok?'Your answer: '+r.given:'Your answer: '+r.given+'. Correct answer: '+r.right+'.'));
+    li.appendChild(d);ul.appendChild(li);
+  });
+  qb.appendChild(ul);
+  var act=el('div','row'),again=el('button','btn primary','Try again with new numbers');again.type='button';
+  again.addEventListener('click',startQuiz);act.appendChild(again);
+  var back=el('a','btn','Back to the lab');back.href='#systems';back.dataset.go='systems';back.style.textDecoration='none';act.appendChild(back);
+  qb.appendChild(act);
+}
+function startQuiz(){
+  var nm=$('#quiz-name');if(nm)quiz.name=nm.value.trim();
+  quiz.qs=makeQuestions();quiz.i=0;quiz.res=[];renderQ();
+}
+$('#quiz-start').addEventListener('click',startQuiz);
+
+/* ---------------- boot ---------------- */
+applyConfig(true);
+setEnergy(105*4184,'');
+go((location.hash||'#systems').slice(1));
+if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){paused=true;$('#btn-pause').textContent='Play';}
+kick();
+})();
+</script>
+
+</body>
+</html>
