@@ -206,7 +206,12 @@ fieldset.q legend{padding:0;margin-bottom:6px}
 .review li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;padding:10px 0;border-top:1px solid var(--line);font-size:15px}
 .review .ic{font-weight:700} .review .ic.ok{color:var(--good)} .review .ic.no{color:var(--bad)}
 .namefield{display:flex;flex-direction:column;gap:4px;max-width:320px}
-.namefield input{padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface)}
+.namefield input{padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);width:100%}
+.send{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:16px}
+.send-fields{display:flex;flex-wrap:wrap;gap:10px}
+.send-fields .namefield{flex:1 1 150px;max-width:none;min-width:0}
+.send-status{font-weight:700;min-height:1.5em}
+.send-status.ok{color:var(--good)} .send-status.no{color:var(--bad)}
 
 @media (max-width:900px){
   .controls,.lower,.two{grid-template-columns:minmax(0,1fr)}
@@ -640,7 +645,7 @@ fieldset.q legend{padding:0;margin-bottom:6px}
         <h2>Check what you learned</h2>
         <div class="prose">
           <p>10 questions on energy forms, joules and Calories, and efficiency. Your first answer to each question is the one that counts, and you get an explanation after every question.</p>
-          <p>Some questions use new numbers each time, so you can retake the quiz for more practice.</p>
+          <p>Some questions use new numbers each time, so you can retake the quiz for more practice. At the end you can send your score to your teacher.</p>
         </div>
         <div class="namefield">
           <label for="quiz-name" class="small"><b>Your name</b> (optional, shown on your score screen)</label>
@@ -1132,7 +1137,36 @@ function makeQuestions(){
       'Generator: '+gX+' J × 0.80 = '+(gX*.8)+' J of electrical energy. Bulb: '+(gX*.8)+' J × '+(gE/100)+' = '+gA+' J of light.','Two steps in a row')
   ];
 }
-var quiz={qs:[],i:0,res:[],name:''},qb=$('#quiz-body');
+var quiz={qs:[],i:0,res:[],name:'',sid:'',block:'',t0:0,qStart:0,done:0,answered:0},qb=$('#quiz-body');
+/* Results go to the class Google Sheet. Sending again replaces that student's earlier rows for this quiz. */
+var REPORT_URL="https://script.google.com/macros/s/AKfycbzdmTC1KKC1ozIOxuRas_ZuYNra6fHQxOHeehxPedPQa2nddXRzDYwGOThDQCJE9vw/exec",ASSIGNMENT='Energy Transformation Quiz',ID_RULE=/^[A-Za-z0-9-]{4,20}$/;
+function two(n){return (n<10?'0':'')+n;}
+function stamp(ms){var d=new Date(ms);return d.getFullYear()+'-'+two(d.getMonth()+1)+'-'+two(d.getDate())+' '+two(d.getHours())+':'+two(d.getMinutes());}
+function sendField(id,label,value,max){
+  var w=el('div','namefield'),l=el('label','small');l.htmlFor=id;l.appendChild(el('b','',label));
+  var inp=document.createElement('input');inp.id=id;inp.type='text';inp.autocomplete='off';inp.maxLength=max;inp.value=value||'';
+  w.appendChild(l);w.appendChild(inp);return w;
+}
+function sendScore(){
+  var btn=$('#send-btn'),st=$('#send-status');
+  function say(t,cls){st.textContent=t;st.className='send-status'+(cls?' '+cls:'');}
+  var id=$('#send-id').value.replace(/\s+/g,'').toUpperCase(),nm=$('#send-name').value.replace(/\s+/g,' ').trim(),bl=$('#send-block').value.replace(/\s+/g,' ').trim();
+  if(!ID_RULE.test(id)){say('Enter your school ID: 4 to 20 letters or numbers, no spaces.','no');$('#send-id').focus();return;}
+  if(!nm){say('Enter your name.','no');$('#send-name').focus();return;}
+  quiz.sid=id;quiz.name=nm;quiz.block=bl;
+  var n=quiz.qs.length,s=quiz.res.filter(function(r){return r.ok;}).length;
+  var summary={student_id:id,student:nm,block:bl,assignment:ASSIGNMENT,status:'Complete',correct:s,first_try_correct:s,questions:n,
+    total_attempts:quiz.answered,hints_shown:0,worked_examples_opened:0,active_minutes:Math.round((quiz.done-quiz.t0)/6000)/10,started:stamp(quiz.t0),finished:stamp(quiz.done)};
+  var detail=quiz.qs.map(function(Q,i){var r=quiz.res[i];
+    return {student_id:id,student:nm,block:bl,assignment:ASSIGNMENT,question:i+1,topic:Q.tag,given:Q.q,correct_answer:String(r.right),last_answer:String(r.given),
+      result:r.ok?'correct':'incorrect',first_try:r.ok?'yes':'no',attempts:1,hint_shown:'no',worked_example_opened:'no',seconds:r.sec};});
+  btn.disabled=true;say('Sending…');
+  fetch(REPORT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({v:1,summary:summary,detail:detail})})
+    .then(function(r){return r.json();})
+    .then(function(j){if(!j||!j.ok)throw new Error('refused');
+      say('Sent to your teacher at '+stamp(Date.now()).slice(11)+'. Score sent: '+s+' / '+n+'.','ok');btn.textContent='Send again';btn.disabled=false;})
+    .catch(function(){say('It did not send. Check your internet connection and press the button again.','no');btn.disabled=false;});
+}
 function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
 function dots(){
   var ul=el('ol','dots');ul.setAttribute('aria-label','Progress');
@@ -1143,7 +1177,7 @@ function dots(){
   return ul;
 }
 function renderQ(){
-  var Q=quiz.qs[quiz.i];qb.innerHTML='';
+  var Q=quiz.qs[quiz.i];qb.innerHTML='';quiz.qStart=Date.now();
   qb.appendChild(dots());
   var fs=el('fieldset','q'),lg=el('legend','eyebrow','Question '+(quiz.i+1)+' of '+quiz.qs.length);
   fs.appendChild(lg);fs.appendChild(el('p','q-text',Q.q));
@@ -1181,14 +1215,14 @@ function renderQ(){
       var ni2=$('#quiz-num'),v=parseFloat(ni2.value.replace(/,/g,''));
       ok=Math.abs(v-Q.ans)<=0.5;given=ni2.value.trim()+' '+Q.unit;right=Q.ans+' '+Q.unit;ni2.disabled=true;
     }
-    quiz.res[quiz.i]={ok:ok,given:given,right:right};
+    quiz.res[quiz.i]={ok:ok,given:given,right:right,sec:Math.round((Date.now()-quiz.qStart)/1000)};
     var f=el('div','fb '+(ok?'ok':'no'));
     f.appendChild(el('b','',ok?'✓ Correct':'✗ Not quite. The answer is '+right+'.'));
     f.appendChild(el('span','',Q.why));fb.appendChild(f);
     qb.replaceChild(dots(),qb.firstChild);
     check.hidden=true;
     var last=quiz.i===quiz.qs.length-1,nx=el('button','btn primary',last?'See my score':'Next question');nx.type='button';nx.id='quiz-next';
-    nx.addEventListener('click',function(){if(last)renderScore();else{quiz.i++;renderQ();}});
+    nx.addEventListener('click',function(){if(last){quiz.done=Date.now();quiz.answered+=quiz.qs.length;renderScore();}else{quiz.i++;renderQ();}});
     act.appendChild(nx);nx.focus();
   });
 }
@@ -1213,14 +1247,24 @@ function renderScore(){
     li.appendChild(d);ul.appendChild(li);
   });
   qb.appendChild(ul);
-  var act=el('div','row'),again=el('button','btn primary','Try again with new numbers');again.type='button';
+  var send=el('div','send');
+  send.appendChild(el('h3','','Send your score to your teacher'));
+  send.appendChild(el('p','muted small','This sends your score, your answers and your time for this attempt. If you retake the quiz and send again, the new score replaces the old one.'));
+  var sf=el('div','send-fields');
+  sf.appendChild(sendField('send-id','School ID',quiz.sid,20));sf.appendChild(sendField('send-name','Your name',quiz.name,60));sf.appendChild(sendField('send-block','Block',quiz.block,12));
+  send.appendChild(sf);
+  var srow=el('div','row'),sbtn=el('button','btn primary','Send my score');sbtn.type='button';sbtn.id='send-btn';sbtn.addEventListener('click',sendScore);
+  srow.appendChild(sbtn);send.appendChild(srow);
+  var sst=el('p','send-status');sst.id='send-status';sst.setAttribute('role','status');sst.setAttribute('aria-live','polite');send.appendChild(sst);
+  qb.appendChild(send);
+  var act=el('div','row'),again=el('button','btn','Try again with new numbers');again.type='button';
   again.addEventListener('click',startQuiz);act.appendChild(again);
   var back=el('a','btn','Back to the lab');back.href='#systems';back.dataset.go='systems';back.style.textDecoration='none';act.appendChild(back);
   qb.appendChild(act);
 }
 function startQuiz(){
   var nm=$('#quiz-name');if(nm)quiz.name=nm.value.trim();
-  quiz.qs=makeQuestions();quiz.i=0;quiz.res=[];renderQ();
+  quiz.qs=makeQuestions();quiz.i=0;quiz.res=[];quiz.t0=Date.now();renderQ();
 }
 $('#quiz-start').addEventListener('click',startQuiz);
 
